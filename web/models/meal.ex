@@ -4,7 +4,7 @@ defmodule Alastair.Meal do
   schema "meals" do
     field :name, :string
     field :time, Ecto.DateTime
-
+    belongs_to :event, Alastair.Event
     many_to_many :recipes, Alastair.Recipe, join_through: Alastair.MealRecipe
 
     timestamps()

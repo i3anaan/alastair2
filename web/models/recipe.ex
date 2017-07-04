@@ -6,10 +6,11 @@ defmodule Alastair.Recipe do
     field :description, :string
     field :person_count, :integer
     field :instructions, :string
-    belongs_to :database, Alastair.Database
 
     many_to_many :meals, Alastair.Meal, join_through: Alastair.MealRecipe
     many_to_many :ingredients, Alastair.Ingredient, join_through: Alastair.RecipeIngredient
+    has_many :recipes_ingredients, Alastair.RecipeIngredient
+    has_many :reviews, Alastair.Review
 
     timestamps()
   end

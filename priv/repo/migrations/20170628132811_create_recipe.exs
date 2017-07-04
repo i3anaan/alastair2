@@ -7,11 +7,9 @@ defmodule Alastair.Repo.Migrations.CreateRecipe do
       add :description, :text
       add :person_count, :integer
       add :instructions, :text
-      add :database_id, references(:databases, on_delete: :nothing)
 
       timestamps()
     end
-    create index(:recipes, [:database_id])
 
   end
 end

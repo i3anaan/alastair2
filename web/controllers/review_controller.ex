@@ -1,22 +1,22 @@
-defmodule Alastair.MealController do
+defmodule Alastair.ReviewController do
   use Alastair.Web, :controller
 
-  alias Alastair.Meal
+  alias Alastair.Review
 
   def index(conn, _params) do
-    meals = Repo.all(Meal)
-    render(conn, "index.json", meals: meals)
+    reviews = Repo.all(Review)
+    render(conn, "index.json", reviews: reviews)
   end
 
-  def create(conn, %{"meal" => meal_params}) do
-    changeset = Meal.changeset(%Meal{}, meal_params)
+  def create(conn, %{"review" => review_params}) do
+    changeset = Review.changeset(%Review{}, review_params)
 
     case Repo.insert(changeset) do
-      {:ok, meal} ->
+      {:ok, review} ->
         conn
         |> put_status(:created)
-        |> put_resp_header("location", event_meal_path(conn, :show, meal.event_id, meal))
-        |> render("show.json", meal: meal)
+        |> put_resp_header("location", recipe_review_path(conn, :show, review.recipe_id, review))
+        |> render("show.json", review: review)
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
@@ -25,17 +25,17 @@ defmodule Alastair.MealController do
   end
 
   def show(conn, %{"id" => id}) do
-    meal = Repo.get!(Meal, id)
-    render(conn, "show.json", meal: meal)
+    review = Repo.get!(Review, id)
+    render(conn, "show.json", review: review)
   end
 
-  def update(conn, %{"id" => id, "meal" => meal_params}) do
-    meal = Repo.get!(Meal, id)
-    changeset = Meal.changeset(meal, meal_params)
+  def update(conn, %{"id" => id, "review" => review_params}) do
+    review = Repo.get!(Review, id)
+    changeset = Review.changeset(review, review_params)
 
     case Repo.update(changeset) do
-      {:ok, meal} ->
-        render(conn, "show.json", meal: meal)
+      {:ok, review} ->
+        render(conn, "show.json", review: review)
       {:error, changeset} ->
         conn
         |> put_status(:unprocessable_entity)
@@ -44,11 +44,11 @@ defmodule Alastair.MealController do
   end
 
   def delete(conn, %{"id" => id}) do
-    meal = Repo.get!(Meal, id)
+    review = Repo.get!(Review, id)
 
     # Here we use delete! (with a bang) because we expect
     # it to always work (and if it does not, it will raise).
-    Repo.delete!(meal)
+    Repo.delete!(review)
 
     send_resp(conn, :no_content, "")
   end

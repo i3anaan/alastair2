@@ -4,15 +4,19 @@ defmodule Alastair.IngredientController do
   alias Alastair.Ingredient
 
   def index(conn, _params) do
-    ingredients = Repo.all(Ingredient)
+    ingredients = Repo.all from p in Ingredient,
+            preload: [:default_measurement]
+
     render(conn, "index.json", ingredients: ingredients)
   end
 
   def create(conn, %{"ingredient" => ingredient_params}) do
+
     changeset = Ingredient.changeset(%Ingredient{}, ingredient_params)
 
     case Repo.insert(changeset) do
       {:ok, ingredient} ->
+        ingredient = Repo.preload(ingredient, :default_measurement)
         conn
         |> put_status(:created)
         |> put_resp_header("location", ingredient_path(conn, :show, ingredient))

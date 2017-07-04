@@ -6,8 +6,6 @@ defmodule Alastair.Repo.Migrations.CreateRecipeIngredient do
       add :quantity, :float
       add :recipe_id, references(:recipes, on_delete: :nothing)
       add :ingredient_id, references(:ingredients, on_delete: :nothing)
-
-      timestamps()
     end
     create index(:recipes_ingredients, [:recipe_id])
     create index(:recipes_ingredients, [:ingredient_id])

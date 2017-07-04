@@ -4,7 +4,7 @@ defmodule Alastair.Ingredient do
   schema "ingredients" do
     field :name, :string
     field :description, :string
-    belongs_to :default_measurement, Alastair.DefaultMeasurement
+    belongs_to :default_measurement, Alastair.Measurement
 
     many_to_many :recipes, Alastair.Recipe, join_through: Alastair.RecipeIngredient
 
@@ -16,7 +16,7 @@ defmodule Alastair.Ingredient do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:name, :description])
-    |> validate_required([:name, :description])
+    |> cast(params, [:name, :description, :default_measurement_id])
+    |> validate_required([:name, :default_measurement_id])
   end
 end

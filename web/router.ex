@@ -23,11 +23,13 @@ defmodule Alastair.Router do
   scope "/api", Alastair do
     pipe_through :api
 
-    resources "/meals", MealController, except: [:new, :edit]
-    resources "/events", EventController, except: [:new, :edit]
-    resources "/recipes", RecipeController, except: [:new, :edit]
-    resources "/databases", DatabaseController, except: [:new, :edit]
-    resources "/ingredients", IngredientController, except: [:new, :edit]
+    resources "/events", EventController, except: [:new, :edit] do
+      resources "/meals", MealController, except: [:new, :edit]
+    end
+    resources "/recipes", RecipeController, except: [:new, :edit] do
+      resources "/reviews", ReviewController, except: [:new, :edit]
+    end
+    resources "/ingredients", IngredientController, except: [:new, :edit, :update]
     resources "/measurements", MeasurementController, except: [:new, :edit]
   end
 end

@@ -3,7 +3,10 @@ defmodule Alastair.Measurement do
 
   schema "measurements" do
     field :name, :string
+    field :plural_name, :string
     field :display_code, :string
+
+    has_many :ingredients, Alastair.Ingredient
 
     timestamps()
   end
@@ -13,7 +16,7 @@ defmodule Alastair.Measurement do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:name, :display_code])
-    |> validate_required([:name, :display_code])
+    |> cast(params, [:name, :plural_name, :display_code])
+    |> validate_required([:name, :plural_name, :display_code])
   end
 end

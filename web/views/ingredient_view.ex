@@ -13,6 +13,13 @@ defmodule Alastair.IngredientView do
     %{id: ingredient.id,
       name: ingredient.name,
       description: ingredient.description,
-      default_measurement_id: ingredient.default_measurement_id}
+      default_measurement: 
+        case Ecto.assoc_loaded?(ingredient.default_measurement) do
+          true -> render_one(ingredient.default_measurement, Alastair.MeasurementView, "measurement.json");
+          false -> nil;
+        end,
+      default_measurement_id: ingredient.default_measurement_id
+    }
   end
 end
+ 

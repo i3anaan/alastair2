@@ -5,8 +5,6 @@ defmodule Alastair.MealRecipe do
     field :person_count, :integer
     belongs_to :meal, Alastair.Meal
     belongs_to :recipe, Alastair.Recipe
-
-    timestamps()
   end
 
   @doc """
@@ -14,7 +12,7 @@ defmodule Alastair.MealRecipe do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:person_count])
-    |> validate_required([:person_count])
+    |> cast(params, [:person_count, :meal_id, :recipe_id])
+    |> validate_required([:person_count, :meal_id, :recipe_id])
   end
 end

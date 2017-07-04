@@ -4,6 +4,7 @@ defmodule Alastair.Repo.Migrations.CreateMeasurement do
   def change do
     create table(:measurements) do
       add :name, :string
+      add :plural_name, :string
       add :display_code, :string
 
       timestamps()

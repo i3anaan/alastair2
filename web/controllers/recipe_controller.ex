@@ -2,10 +2,17 @@ defmodule Alastair.RecipeController do
   use Alastair.Web, :controller
 
   alias Alastair.Recipe
+  alias Alastair.RecipeIngredient
 
   def index(conn, _params) do
     recipes = Repo.all(Recipe)
     render(conn, "index.json", recipes: recipes)
+  end
+
+  defp create_recipe_ingredient(recipe_id, ingredient_id, quantity) do
+    changeset = RecipeIngredient.changeset(%RecipeIngredient{}, %{recipe_id: recipe_id, ingredient_id: ingredient_id, quantity: quantity})
+    # TODO add error handling
+    Repo.insert!(changeset)
   end
 
   def create(conn, %{"recipe" => recipe_params}) do
@@ -13,6 +20,13 @@ defmodule Alastair.RecipeController do
 
     case Repo.insert(changeset) do
       {:ok, recipe} ->
+
+        recipe_params["ingredients"]
+        |> Enum.uniq_by(fn(x) -> x["ingredient_id"] end) # TODO merge duplicate ingredients into one
+        |> Enum.map(fn(x) -> create_recipe_ingredient(recipe.id, x["ingredient_id"], x["quantity"]) end)
+
+        recipe = Repo.preload(recipe, [{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}])
+
         conn
         |> put_status(:created)
         |> put_resp_header("location", recipe_path(conn, :show, recipe))
@@ -26,6 +40,7 @@ defmodule Alastair.RecipeController do
 
   def show(conn, %{"id" => id}) do
     recipe = Repo.get!(Recipe, id)
+      |> Repo.preload([{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}]) # Preload nested recipe_ingredient and ingredient and measurement
     render(conn, "show.json", recipe: recipe)
   end
 
@@ -35,6 +50,15 @@ defmodule Alastair.RecipeController do
 
     case Repo.update(changeset) do
       {:ok, recipe} ->
+        # Delete all ingredients and add all again
+        from(p in RecipeIngredient, where: p.recipe_id == ^recipe.id) |> Repo.delete_all
+
+        recipe_params["ingredients"]
+        |> Enum.uniq_by(fn(x) -> x["ingredient_id"] end) # TODO merge duplicate ingredients into one
+        |> Enum.map(fn(x) -> create_recipe_ingredient(recipe.id, x["ingredient_id"], x["quantity"]) end)
+
+        recipe = Repo.preload(recipe, [{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}])
+
         render(conn, "show.json", recipe: recipe)
       {:error, changeset} ->
         conn
@@ -44,11 +68,9 @@ defmodule Alastair.RecipeController do
   end
 
   def delete(conn, %{"id" => id}) do
-    recipe = Repo.get!(Recipe, id)
+    Repo.get!(Recipe, id) |> Repo.delete!
 
-    # Here we use delete! (with a bang) because we expect
-    # it to always work (and if it does not, it will raise).
-    Repo.delete!(recipe)
+    from(p in RecipeIngredient, where: p.recipe_id == ^recipe.id) |> Repo.delete_all
 
     send_resp(conn, :no_content, "")
   end

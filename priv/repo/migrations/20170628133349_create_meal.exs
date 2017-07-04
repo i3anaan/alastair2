@@ -4,10 +4,14 @@ defmodule Alastair.Repo.Migrations.CreateMeal do
   def change do
     create table(:meals) do
       add :name, :string
-      add :time, :datetime
+      add :time, :utc_datetime
+
+      add :event_id, references(:events, on_delete: :nothing)
+
 
       timestamps()
     end
+    create index(:meals, [:event_id])
 
   end
 end

@@ -1,0 +1,19 @@
+docker run --name questions-postgres -p 5432:5432 -d postgres
+
+
+docker start questions-postgres
+
+docker run -d -p 5050:5050 --name questions-admin --link questions-postgres:pg thajeztah/pgadmin4
+
+docker start questions-admin
+
+
+in conexp-server:
+lein repl
+
+(load-file "calc_implications.clj")
+
+phoenix:
+
+mix ecto.reset
+mix phoenix.server

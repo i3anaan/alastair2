@@ -12,6 +12,7 @@ defmodule Alastair.MeasurementView do
   def render("measurement.json", %{measurement: measurement}) do
     %{id: measurement.id,
       name: measurement.name,
+      plural_name: measurement.plural_name,
       display_code: measurement.display_code}
   end
 end

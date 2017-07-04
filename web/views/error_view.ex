@@ -5,6 +5,13 @@ defmodule Alastair.ErrorView do
     "Page not found"
   end
 
+  def render("error.json", %{message: message}) do
+    %{
+      success: false,
+      error: message
+    }
+  end
+
   def render("500.html", _assigns) do
     "Internal server error"
   end

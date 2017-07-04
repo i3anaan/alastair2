@@ -15,6 +15,7 @@ defmodule Alastair.RecipeView do
       description: recipe.description,
       person_count: recipe.person_count,
       instructions: recipe.instructions,
+      avg_review: recipe.avg_review,
       database_id: Map.get(recipe, :database_id, nil),
       ingredients: 
         case Ecto.assoc_loaded?(recipe.recipes_ingredients) do

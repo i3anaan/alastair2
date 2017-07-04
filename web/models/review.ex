@@ -4,6 +4,7 @@ defmodule Alastair.Review do
   schema "reviews" do
     field :rating, :integer
     field :review, :string
+    field :user_id, :string
     belongs_to :recipe, Alastair.Recipe
 
     timestamps()
@@ -14,7 +15,7 @@ defmodule Alastair.Review do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:rating, :review])
-    |> validate_required([:rating, :review])
+    |> cast(params, [:rating, :review, :user_id, :recipe_id])
+    |> validate_required([:rating, :review, :user_id, :recipe_id])
   end
 end

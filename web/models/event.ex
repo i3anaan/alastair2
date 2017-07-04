@@ -1,10 +1,9 @@
 defmodule Alastair.Event do
   use Alastair.Web, :model
 
+  @primary_key {:id, :string, []}
+  @derive {Phoenix.Param, key: :id}
   schema "events" do
-    field :oms_id, :string
-
-    timestamps()
   end
 
   @doc """
@@ -12,7 +11,7 @@ defmodule Alastair.Event do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:oms_id])
-    |> validate_required([:oms_id])
+    |> cast(params, [:id])
+    |> validate_required([:id])
   end
 end

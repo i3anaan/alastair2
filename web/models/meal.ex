@@ -4,8 +4,10 @@ defmodule Alastair.Meal do
   schema "meals" do
     field :name, :string
     field :time, Ecto.DateTime
-    belongs_to :event, Alastair.Event
+    field :event_id, :string
+
     many_to_many :recipes, Alastair.Recipe, join_through: Alastair.MealRecipe
+    has_many :meals_recipes, Alastair.MealRecipe
 
     timestamps()
   end
@@ -15,7 +17,7 @@ defmodule Alastair.Meal do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:name, :time])
-    |> validate_required([:name, :time])
+    |> cast(params, [:name, :event_id])
+    |> validate_required([:name, :event_id])
   end
 end

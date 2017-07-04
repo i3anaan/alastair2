@@ -2,10 +2,8 @@ defmodule Alastair.Repo.Migrations.CreateEvent do
   use Ecto.Migration
 
   def change do
-    create table(:events) do
-      add :oms_id, :string
-
-      timestamps()
+    create table(:events, primary_key: false) do
+      add :id, :string, primary_key: true
     end
 
   end

@@ -8,6 +8,8 @@ defmodule Alastair.Repo.Migrations.CreateRecipe do
       add :person_count, :integer
       add :instructions, :text
 
+      add :avg_review, :float
+
       timestamps()
     end
 

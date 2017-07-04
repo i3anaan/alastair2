@@ -70,8 +70,26 @@ defmodule Alastair.RecipeController do
   def delete(conn, %{"id" => id}) do
     Repo.get!(Recipe, id) |> Repo.delete!
 
-    from(p in RecipeIngredient, where: p.recipe_id == ^recipe.id) |> Repo.delete_all
+    from(p in RecipeIngredient, where: p.recipe_id == ^id) |> Repo.delete_all
 
     send_resp(conn, :no_content, "")
+  end
+
+  defp calc_avg_review(id) do
+    tmp = from(p in Alastair.Review, where: p.recipe_id == ^id) 
+    |> Repo.all
+    |> Enum.reduce({0, 0}, fn(x, acc) -> {elem(acc, 0) + x.rating, elem(acc, 1) + 1} end)
+
+    case elem(tmp, 1) do
+      0 -> nil
+      _ -> elem(tmp, 0) / elem(tmp, 1)
+    end
+  end
+
+  def update_avg_review(id) do
+    review = calc_avg_review(id)
+    Repo.get!(Recipe, id)
+    |> Ecto.Changeset.change(avg_review: review)
+    |> Repo.update!
   end
 end

@@ -139,3 +139,23 @@ Alastair.Repo.insert!(%Alastair.RecipeIngredient{
 	ingredient: tomatoes,
 	quantity: 400.0
 })
+
+Alastair.Repo.insert!(%Alastair.Review{
+	user_id: "testtest",
+	review: "Pretty neat recipe, I recommend. Lacks garlic though",
+	rating: 4,
+	recipe: recipe1
+})
+
+Alastair.RecipeController.update_avg_review(recipe1.id)
+
+meal1 = Alastair.Repo.insert!(%Alastair.Meal{
+	name: "Dinner",
+	event_id: "DevelopYourself3",
+})
+
+Alastair.Repo.insert!(%Alastair.MealRecipe{
+	meal: meal1,
+	recipe: recipe1,
+	person_count: 10
+})

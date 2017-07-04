@@ -13,6 +13,8 @@ defmodule Alastair.ReviewView do
     %{id: review.id,
       rating: review.rating,
       review: review.review,
-      recipe_id: review.recipe_id}
+      recipe_id: review.recipe_id,
+      user_id: review.user_id
+    }
   end
 end

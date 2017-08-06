@@ -1,0 +1,19 @@
+Backend
+x Create/list ingredients
+x Create/list recipes
+x Recipe/ingredients
+x Recipe reviews
+x Meals
+x Meal per event
+x Currencies
+o Event listing
+o Event editors, event permissions
+o Event/Shop
+o Shopping list
+o Shop editors, shop permissions
+o Global editors
+o Shop listing, creation
+o Shopping items, mapping to ingredients
+
+Frontend
+o Everything

@@ -36,5 +36,10 @@ defmodule Alastair.Router do
     end
     resources "/ingredients", IngredientController, except: [:new, :edit, :update]
     resources "/measurements", MeasurementController, except: [:new, :edit]
+
+    resources "/shops", ShopController, except: [:new, :edit] do
+      resources "/shopping_items", ShoppingItemController, except: [:new, :edit]
+    end
+    resources "/currencies", CurrencyController, only: [:index]
   end
 end

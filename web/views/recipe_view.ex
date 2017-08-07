@@ -1,5 +1,6 @@
 defmodule Alastair.RecipeView do
   use Alastair.Web, :view
+  import Alastair.Helper
 
   def render("index.json", %{recipes: recipes}) do
     %{data: render_many(recipes, Alastair.RecipeView, "recipe.json")}
@@ -17,17 +18,13 @@ defmodule Alastair.RecipeView do
       instructions: recipe.instructions,
       avg_review: recipe.avg_review,
       database_id: Map.get(recipe, :database_id, nil),
-      ingredients: 
-        case Ecto.assoc_loaded?(recipe.recipes_ingredients) do
-          true -> render_many(recipe.recipes_ingredients, Alastair.RecipeView, "recipe_ingredient.json");
-          false -> nil;
-        end
+      ingredients: render_assoc_many(recipe.recipes_ingredients, Alastair.RecipeView, "recipe_ingredient.json")
     }
   end
 
   def render("recipe_ingredient.json", %{recipe: recipe_ingredient}) do
     %{quantity: recipe_ingredient.quantity,
-      ingredient: render_one(recipe_ingredient.ingredient, Alastair.IngredientView, "ingredient.json"),
+      ingredient: render_assoc_one(recipe_ingredient.ingredient, Alastair.IngredientView, "ingredient.json"),
       ingredient_id: recipe_ingredient.ingredient_id
     }
   end

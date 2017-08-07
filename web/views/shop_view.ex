@@ -1,5 +1,6 @@
 defmodule Alastair.ShopView do
   use Alastair.Web, :view
+  import Alastair.Helper
 
   def render("index.json", %{shops: shops}) do
     %{data: render_many(shops, Alastair.ShopView, "shop.json")}
@@ -13,6 +14,8 @@ defmodule Alastair.ShopView do
     %{id: shop.id,
       name: shop.name,
       location: shop.location,
-      currency_id: shop.currency_id}
+      currency_id: shop.currency_id,
+      currency: render_assoc_one(shop.currency, Alastair.CurrencyView, "currency.json")
+    }
   end
 end

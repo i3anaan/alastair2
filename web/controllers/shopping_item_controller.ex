@@ -3,8 +3,8 @@ defmodule Alastair.ShoppingItemController do
 
   alias Alastair.ShoppingItem
 
-  def index(conn, _params) do
-    shopping_items = Repo.all(ShoppingItem)
+  def index(conn, %{"shop_id" => shop_id}) do
+    shopping_items = from(p in ShoppingItem, where: p.shop_id == ^shop_id) |> Repo.all
     render(conn, "index.json", shopping_items: shopping_items)
   end
 
@@ -13,6 +13,8 @@ defmodule Alastair.ShoppingItemController do
 
     case Repo.insert(changeset) do
       {:ok, shopping_item} ->
+        shopping_item = Repo.preload(shopping_item, [:buying_measurement, :mapped_ingredient])
+
         conn
         |> put_status(:created)
         |> put_resp_header("location", shop_shopping_item_path(conn, :show, shop_id, shopping_item))
@@ -26,11 +28,14 @@ defmodule Alastair.ShoppingItemController do
 
   def show(conn, %{"id" => id}) do
     shopping_item = Repo.get!(ShoppingItem, id)
+    |> Repo.preload([:buying_measurement, :mapped_ingredient])
+
     render(conn, "show.json", shopping_item: shopping_item)
   end
 
   def update(conn, %{"id" => id, "shopping_item" => shopping_item_params}) do
     shopping_item = Repo.get!(ShoppingItem, id)
+    |> Repo.preload([:buying_measurement, :mapped_ingredient])
     changeset = ShoppingItem.changeset(shopping_item, shopping_item_params)
 
     case Repo.update(changeset) do

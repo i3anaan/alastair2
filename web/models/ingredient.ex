@@ -7,6 +7,7 @@ defmodule Alastair.Ingredient do
     belongs_to :default_measurement, Alastair.Measurement
 
     many_to_many :recipes, Alastair.Recipe, join_through: Alastair.RecipeIngredient
+    has_many :mapped_shopping_items, Alastair.ShoppingItem
 
     timestamps()
   end

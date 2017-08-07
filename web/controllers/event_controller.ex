@@ -8,7 +8,7 @@ defmodule Alastair.EventController do
   end
 
   def get_event_editors(id) do
-    from(p in EventEditor, where: p.event_id == ^id) |> Repo.all
+    from(p in Alastair.EventEditor, where: p.event_id == ^id) |> Repo.all
   end
 
   # It is only possible to show an event, if it does not exist in our database we create it right away

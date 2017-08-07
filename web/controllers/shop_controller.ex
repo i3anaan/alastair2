@@ -15,6 +15,8 @@ defmodule Alastair.ShopController do
 
     case Repo.insert(changeset) do
       {:ok, shop} ->
+        shop = Repo.preload(shop, [:currency])
+
         conn
         |> put_status(:created)
         |> put_resp_header("location", shop_path(conn, :show, shop))
@@ -28,13 +30,14 @@ defmodule Alastair.ShopController do
 
   def show(conn, %{"id" => id}) do
     shop = Repo.get!(Shop, id)
-    |> Repo.preload([:shopping_items, :currency])
+    |> Repo.preload([:currency])
 
     render(conn, "show.json", shop: shop)
   end
 
   def update(conn, %{"id" => id, "shop" => shop_params}) do
     shop = Repo.get!(Shop, id)
+    |> Repo.preload([:currency])
     changeset = Shop.changeset(shop, shop_params)
 
     case Repo.update(changeset) do
@@ -50,7 +53,7 @@ defmodule Alastair.ShopController do
   def delete(conn, %{"id" => id}) do
     shop = Repo.get!(Shop, id)
 
-    from(p in ShoppingItem, where: p.shop_id == ^id) |> Repo.delete_all
+    from(p in Alastair.ShoppingItem, where: p.shop_id == ^id) |> Repo.delete_all
 
     # Here we use delete! (with a bang) because we expect
     # it to always work (and if it does not, it will raise).

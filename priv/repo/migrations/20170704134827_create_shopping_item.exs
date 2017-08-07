@@ -3,8 +3,10 @@ defmodule Alastair.Repo.Migrations.CreateShoppingItem do
 
   def change do
     create table(:shopping_items) do
+      add :name, :string
       add :comment, :string
       add :buying_quantity, :float
+      add :flexible_amount, :boolean
       add :price, :float
       add :buying_measurement_id, references(:measurements, on_delete: :nothing)
       add :mapped_ingredient_id, references(:ingredients, on_delete: :nothing)

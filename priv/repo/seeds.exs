@@ -245,3 +245,53 @@ Alastair.Repo.insert!(%Alastair.MealRecipe{
 	recipe: recipe1,
 	person_count: 10
 })
+
+shop1 = Alastair.Repo.insert!(%Alastair.Shop{
+	name: "Aldi",
+	location: "Dresden",
+	currency: euro
+})
+
+shop2 = Alastair.Repo.insert!(%Alastair.Shop{
+	name: "Edeka",
+	location: "Dresden",
+	currency: euro
+})
+
+Alastair.Repo.insert!(%Alastair.ShoppingItem{
+	name: "Barilla Spaghetti",
+	buying_quantity: 500.0,
+	buying_measurement: g,
+	price: 1.19,
+	mapped_ingredient: spaghetti,
+	shop: shop1
+})
+
+Alastair.Repo.insert!(%Alastair.ShoppingItem{
+	name: "Gut und Günstig Spaghetti",
+	buying_quantity: 500.0,
+	buying_measurement: g,
+	price: 0.39,
+	mapped_ingredient: spaghetti,
+	shop: shop1
+})
+
+Alastair.Repo.insert!(%Alastair.ShoppingItem{
+	name: "Frische Tomaten",
+	buying_quantity: 1000.0,
+	flexible_amount: true,
+	buying_measurement: g,
+	price: 2.39,
+	mapped_ingredient: tomatoes,
+	shop: shop1
+})
+
+Alastair.Repo.insert!(%Alastair.ShoppingItem{
+	name: "Frische Tomaten im Schälchen",
+	buying_quantity: 500.0,
+	flexible_amount: false,
+	buying_measurement: g,
+	price: 1.69,
+	mapped_ingredient: tomatoes,
+	shop: shop1
+})

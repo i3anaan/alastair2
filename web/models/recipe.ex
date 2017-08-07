@@ -22,6 +22,6 @@ defmodule Alastair.Recipe do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:name, :description, :person_count, :instructions])
-    |> validate_required([:name, :description, :person_count, :instructions])
+    |> validate_required([:name, :person_count, :instructions])
   end
 end

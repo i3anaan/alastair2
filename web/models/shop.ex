@@ -16,7 +16,7 @@ defmodule Alastair.Shop do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:name, :location])
-    |> validate_required([:name, :location])
+    |> cast(params, [:name, :location, :currency_id])
+    |> validate_required([:name, :currency_id])
   end
 end

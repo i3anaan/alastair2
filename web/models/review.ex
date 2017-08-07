@@ -17,5 +17,6 @@ defmodule Alastair.Review do
     struct
     |> cast(params, [:rating, :review, :user_id, :recipe_id])
     |> validate_required([:rating, :review, :user_id, :recipe_id])
+    |> foreign_key_constraint(:recipe_id)
   end
 end

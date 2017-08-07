@@ -14,5 +14,6 @@ defmodule Alastair.RecipeIngredient do
     struct
     |> cast(params, [:quantity, :recipe_id, :ingredient_id])
     |> validate_required([:quantity, :recipe_id, :ingredient_id])
+    |> foreign_key_constraint([:recipe_id, :ingredient_id])
   end
 end

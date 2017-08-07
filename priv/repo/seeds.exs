@@ -295,3 +295,28 @@ Alastair.Repo.insert!(%Alastair.ShoppingItem{
 	mapped_ingredient: tomatoes,
 	shop: shop1
 })
+
+Alastair.Repo.insert!(%Alastair.ShoppingItem{
+	name: "Zwiebel Sack",
+	buying_quantity: 2500.0,
+	flexible_amount: false,
+	buying_measurement: g,
+	price: 1.39,
+	mapped_ingredient: onions,
+	shop: shop1
+})
+
+Alastair.Repo.insert!(%Alastair.ShoppingItem{
+	name: "Salz",
+	buying_quantity: 500.0,
+	flexible_amount: false,
+	buying_measurement: g,
+	price: 0.29,
+	mapped_ingredient: salt,
+	shop: shop1
+})
+
+Alastair.Repo.insert!(%Alastair.Event{
+	id: "DevelopYourself3",
+	shop: shop1
+})

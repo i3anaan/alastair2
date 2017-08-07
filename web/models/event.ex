@@ -4,6 +4,7 @@ defmodule Alastair.Event do
   @primary_key {:id, :string, []}
   @derive {Phoenix.Param, key: :id}
   schema "events" do
+    belongs_to :shop, Alastair.Shop
   end
 
   @doc """
@@ -11,7 +12,8 @@ defmodule Alastair.Event do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:id])
+    |> cast(params, [:shop_id])
     |> validate_required([:id])
+    |> foreign_key_constraint(:shop_id)
   end
 end

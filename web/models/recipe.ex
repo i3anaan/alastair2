@@ -23,5 +23,6 @@ defmodule Alastair.Recipe do
     struct
     |> cast(params, [:name, :description, :person_count, :instructions])
     |> validate_required([:name, :person_count, :instructions])
+    |> validate_number(:person_count, greater_than: 0)
   end
 end

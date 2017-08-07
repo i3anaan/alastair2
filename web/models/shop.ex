@@ -18,5 +18,6 @@ defmodule Alastair.Shop do
     struct
     |> cast(params, [:name, :location, :currency_id])
     |> validate_required([:name, :currency_id])
+    |> foreign_key_constraint(:currency_id)
   end
 end

@@ -10,10 +10,12 @@ o Event listing
 o Event editors, event permissions
 o Event/Shop
 o Shopping list
+	o Problem: several shopping items to the same ingredient, idea: price only difference, show range?
 o Shop editors, shop permissions
 o Global editors
 x Shop listing, creation
-o Shopping items, mapping to ingredients
+x Shopping items, mapping to ingredients
+o Validation errors in good Format
 
 Frontend
 o Everything

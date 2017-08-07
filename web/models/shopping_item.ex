@@ -21,5 +21,6 @@ defmodule Alastair.ShoppingItem do
     struct
     |> cast(params, [:name, :comment, :buying_quantity, :flexible_amount, :price, :buying_measurement_id, :mapped_ingredient_id, :shop_id])
     |> validate_required([:name, :buying_quantity, :price, :flexible_amount, :buying_measurement_id, :mapped_ingredient_id, :shop_id])
+    |> foreign_key_constraint([:buying_measurement_id,  :mapped_ingredient_id, :shop_id])
   end
 end

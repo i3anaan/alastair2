@@ -4,7 +4,8 @@ defmodule Alastair.Repo.Migrations.CreateEvent do
   def change do
     create table(:events, primary_key: false) do
       add :id, :string, primary_key: true
+      add :shop_id, references(:shops, on_delete: :nothing)
     end
-
+    create index(:events, [:shop_id])
   end
 end

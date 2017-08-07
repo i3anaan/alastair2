@@ -1,5 +1,6 @@
 defmodule Alastair.EventView do
   use Alastair.Web, :view
+  import Alastair.Helper
 
   def render("index.json", %{events: events}) do
     %{data: render_many(events, Alastair.EventView, "event.json")}
@@ -11,6 +12,9 @@ defmodule Alastair.EventView do
 
   def render("event.json", %{event: event}) do
     %{id: event.id,
-      oms_id: event.oms_id}
+      shop_id: event.shop_id,
+      shop: render_assoc_one(event.shop, Alastair.ShopView, "shop.json"),
+      meals: render_assoc_many(event.meals, Alastair.MealView, "meal.json")
+    }
   end
 end

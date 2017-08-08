@@ -1,14 +1,11 @@
 defmodule Alastair.EventEditor do
   use Alastair.Web, :model
+  
 
   schema "event_editors" do
     field :event_id, :string
-    field :user_id, :string
-    field :role_id, :string
-    field :body_id, :string
-    field :anyone, :boolean
-
-    field :admin, :boolean
+    field :value, :string
+    field :permission_type, PermissionTypeEnum
   end
 
   @doc """

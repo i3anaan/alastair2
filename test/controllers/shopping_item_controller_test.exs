@@ -19,7 +19,6 @@ defmodule Alastair.ShoppingItemControllerTest do
     conn = get conn, shopping_item_path(conn, :show, shopping_item)
     assert json_response(conn, 200)["data"] == %{"id" => shopping_item.id,
       "comment" => shopping_item.comment,
-      "buying_measurement_id" => shopping_item.buying_measurement_id,
       "buying_quantity" => shopping_item.buying_quantity,
       "mapped_ingredient_id" => shopping_item.mapped_ingredient_id,
       "price" => shopping_item.price,

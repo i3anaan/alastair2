@@ -41,12 +41,6 @@ pieces = Alastair.Repo.insert!(%Alastair.Measurement{
 	display_code: "pc"
 })
 
-some = Alastair.Repo.insert!(%Alastair.Measurement{
-	name: "Some",
-	plural_name: "Some",
-	display_code: ""
-})
-
 euro = Alastair.Repo.insert!(%Alastair.Currency{
 	name: "Euro",
 	display_code: "€"
@@ -185,14 +179,14 @@ spaghetti = Alastair.Repo.insert!(%Alastair.Ingredient{
 salt = Alastair.Repo.insert!(%Alastair.Ingredient{
 	name: "Salt",
 	description: "",
-	default_measurement: some
+	default_measurement: g
 })
 
 
 Alastair.Repo.insert!(%Alastair.Ingredient{
 	name: "Pepper",
 	description: "",
-	default_measurement: some
+	default_measurement: g
 })
 
 recipe1 = Alastair.Repo.insert!(%Alastair.Recipe{
@@ -243,7 +237,7 @@ meal1 = Alastair.Repo.insert!(%Alastair.Meal{
 Alastair.Repo.insert!(%Alastair.MealRecipe{
 	meal: meal1,
 	recipe: recipe1,
-	person_count: 10
+	person_count: 11
 })
 
 shop1 = Alastair.Repo.insert!(%Alastair.Shop{
@@ -261,7 +255,6 @@ shop2 = Alastair.Repo.insert!(%Alastair.Shop{
 Alastair.Repo.insert!(%Alastair.ShoppingItem{
 	name: "Barilla Spaghetti",
 	buying_quantity: 500.0,
-	buying_measurement: g,
 	price: 1.19,
 	mapped_ingredient: spaghetti,
 	shop: shop1
@@ -270,7 +263,6 @@ Alastair.Repo.insert!(%Alastair.ShoppingItem{
 Alastair.Repo.insert!(%Alastair.ShoppingItem{
 	name: "Gut und Günstig Spaghetti",
 	buying_quantity: 500.0,
-	buying_measurement: g,
 	price: 0.39,
 	mapped_ingredient: spaghetti,
 	shop: shop1
@@ -280,7 +272,6 @@ Alastair.Repo.insert!(%Alastair.ShoppingItem{
 	name: "Frische Tomaten",
 	buying_quantity: 1000.0,
 	flexible_amount: true,
-	buying_measurement: g,
 	price: 2.39,
 	mapped_ingredient: tomatoes,
 	shop: shop1
@@ -290,7 +281,6 @@ Alastair.Repo.insert!(%Alastair.ShoppingItem{
 	name: "Frische Tomaten im Schälchen",
 	buying_quantity: 500.0,
 	flexible_amount: false,
-	buying_measurement: g,
 	price: 1.69,
 	mapped_ingredient: tomatoes,
 	shop: shop1
@@ -300,7 +290,6 @@ Alastair.Repo.insert!(%Alastair.ShoppingItem{
 	name: "Zwiebel Sack",
 	buying_quantity: 2500.0,
 	flexible_amount: false,
-	buying_measurement: g,
 	price: 1.39,
 	mapped_ingredient: onions,
 	shop: shop1
@@ -310,7 +299,6 @@ Alastair.Repo.insert!(%Alastair.ShoppingItem{
 	name: "Salz",
 	buying_quantity: 500.0,
 	flexible_amount: false,
-	buying_measurement: g,
 	price: 0.29,
 	mapped_ingredient: salt,
 	shop: shop1

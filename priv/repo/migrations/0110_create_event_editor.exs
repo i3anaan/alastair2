@@ -4,12 +4,8 @@ defmodule Alastair.Repo.Migrations.CreateEventEditor do
   def change do
     create table(:event_editors) do
       add :event_id, :string
-      add :user_id, :string
-      add :role_id, :string
-      add :body_id, :string
-      add :anyone, :boolean
-
-      add :admin, :boolean
+      add :value, :string
+      add :permission_type, :permission_type
     end
 
   end

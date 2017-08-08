@@ -1,7 +1,6 @@
 defmodule Alastair.ShoppingListController do
   use Alastair.Web, :controller
 
-  alias Alastair.Event
   alias Alastair.Meal
 
   defp multiply_person_count(recipe) do
@@ -16,18 +15,9 @@ defmodule Alastair.ShoppingListController do
       if item.flexible_amount do
         ri.real_quantity / item.buying_quantity
       else
-        IO.inspect(ri)
-        IO.inspect(item)
         Float.ceil(ri.real_quantity / item.buying_quantity)
       end
     end
-  end
-
-  defp choose_shopping_item(shopping_items, ri) do
-    shopping_items
-    |> Enum.filter(fn(x) -> x.mapped_ingredient_id == ri.ingredient_id end)
-    |> Enum.sort(fn(a, b) -> a.price > b.price end)
-    |> Enum.at(-1)
   end
 
   def shopping_list(conn, %{"event_id" => event_id}) do
@@ -51,25 +41,40 @@ defmodule Alastair.ShoppingListController do
 
     # Fetch shopping_items for those ris from db
     shopping_items = from(p in Alastair.ShoppingItem,
-      where: p.shop_id == ^event.shop_id and p.mapped_ingredient_id in ^Map.keys(ingredients),
-      preload: [:buying_measurement]) 
+      where: p.shop_id == ^event.shop_id and p.mapped_ingredient_id in ^Map.keys(ingredients)) 
     |> Repo.all 
 
-    # For each of the ri, add a shopping_item based on a choice function and multiply up the price
+    # For each ri, find all suitable shopping items and calculate price, buying quantity, etc for each of these items
+    # Sort them ascending by price, so the best option is always first
+    # Also copy the best price straight into the ri
     ingredients = Map.values(ingredients)
     |> Enum.map(fn(ri) -> 
-      item = choose_shopping_item(shopping_items, ri)
-      count = calc_item_count(item, ri)
+      items = shopping_items 
+      |> Enum.filter(fn(x) -> x.mapped_ingredient_id == ri.ingredient_id end)
+      |> Enum.map(fn(item) -> 
+        count = calc_item_count(item, ri)
+        %{}
+        |> Map.put(:shopping_item, item)
+        |> Map.put(:shopping_item_id, item.id)
+        |> Map.put(:item_count, count)
+        |> Map.put(:item_quantity, count * item.buying_quantity)
+        |> Map.put(:item_price, count * item.price)
+      end)
+      |> Enum.sort(fn(a, b) -> a.item_price < b.item_price end)
+
+      best_item = case length(items) do
+        0 -> %{item_price: 0}
+        _ -> hd(items)
+      end
 
       ri
-      |> Map.put(:shopping_item, item)
-      |> Map.put(:item_count, count)
-      |> Map.put(:item_quantity, count * item.buying_quantity)
-      |> Map.put(:item_price, count * item.price)
+      |> Map.put(:items, items)
+      |> Map.put(:best_price, best_item.item_price)
     end)
-    |> IO.inspect
 
-    send_resp(conn, :no_content, "")
+
+
+    render(conn, "list.json", items: ingredients)
   end
 
 end

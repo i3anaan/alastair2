@@ -2,59 +2,34 @@ defmodule Alastair.EventControllerTest do
   use Alastair.ConnCase
 
   alias Alastair.Event
-  @valid_attrs %{oms_id: "some content"}
-  @invalid_attrs %{}
+  @test_id "DevelopYourself3"
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
   end
 
-  test "lists all entries on index", %{conn: conn} do
-    conn = get conn, event_path(conn, :index)
-    assert json_response(conn, 200)["data"] == []
-  end
 
-  test "shows chosen resource", %{conn: conn} do
-    event = Repo.insert! %Event{}
-    conn = get conn, event_path(conn, :show, event)
-    assert json_response(conn, 200)["data"] == %{"id" => event.id,
-      "oms_id" => event.oms_id}
-  end
-
-  test "renders page not found when id is nonexistent", %{conn: conn} do
-    assert_error_sent 404, fn ->
-      get conn, event_path(conn, :show, -1)
-    end
-  end
-
-  test "creates and renders resource when data is valid", %{conn: conn} do
-    conn = post conn, event_path(conn, :create), event: @valid_attrs
-    assert json_response(conn, 201)["data"]["id"]
-    assert Repo.get_by(Event, @valid_attrs)
-  end
-
-  test "does not create resource and renders errors when data is invalid", %{conn: conn} do
-    conn = post conn, event_path(conn, :create), event: @invalid_attrs
-    assert json_response(conn, 422)["errors"] != %{}
+  test "creates resource upon show", %{conn: conn} do
+    conn = get conn, event_path(conn, :show, @test_id)
+    assert json_response(conn, 200)["data"] |> map_inclusion(%{"id" => @test_id})
   end
 
   test "updates and renders chosen resource when data is valid", %{conn: conn} do
-    event = Repo.insert! %Event{}
-    conn = put conn, event_path(conn, :update, event), event: @valid_attrs
-    assert json_response(conn, 200)["data"]["id"]
-    assert Repo.get_by(Event, @valid_attrs)
+    %{:euro => euro} = Alastair.Seeds.CurrencySeed.run
+    shop = Repo.insert! %Alastair.Shop{
+      name: "Aldi",
+      location: "Dresden",
+      currency: euro
+    }
+    get conn, event_path(conn, :show, @test_id)
+    conn = put conn, event_path(conn, :update, @test_id), event: %{shop_id: shop.id}
+    assert json_response(conn, 200)["data"]["id"] == @test_id
+    assert Repo.get_by(Event, %{id: @test_id})
   end
 
   test "does not update chosen resource and renders errors when data is invalid", %{conn: conn} do
-    event = Repo.insert! %Event{}
-    conn = put conn, event_path(conn, :update, event), event: @invalid_attrs
+    get conn, event_path(conn, :show, @test_id)
+    conn = put conn, event_path(conn, :update, @test_id), event: %{shop_id: -1}
     assert json_response(conn, 422)["errors"] != %{}
-  end
-
-  test "deletes chosen resource", %{conn: conn} do
-    event = Repo.insert! %Event{}
-    conn = delete conn, event_path(conn, :delete, event)
-    assert response(conn, 204)
-    refute Repo.get(Event, event.id)
   end
 end

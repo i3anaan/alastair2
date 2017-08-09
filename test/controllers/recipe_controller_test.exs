@@ -15,14 +15,30 @@ defmodule Alastair.RecipeControllerTest do
   end
 
   test "shows chosen resource", %{conn: conn} do
-    recipe = Repo.insert! %Recipe{}
+    %{:ml => ml} = Alastair.Seeds.MeasurementSeed.run()
+    ingredient = Repo.insert! %Alastair.Ingredient{
+      name: "Cream",
+      description: "Milkproduct",
+      default_measurement_id: ml.id
+    }
+    recipe = Repo.insert! %Recipe{description: "some content", instructions: "some content", name: "some content", person_count: 42}
+
+    recipe_ingredient = Repo.insert! %Alastair.RecipeIngredient{
+      recipe: recipe,
+      ingredient: ingredient,
+      quantity: 100.0
+    }
+
     conn = get conn, recipe_path(conn, :show, recipe)
-    assert json_response(conn, 200)["data"] == %{"id" => recipe.id,
+    assert json_response(conn, 200)["data"] |> map_inclusion(%{"id" => recipe.id,
       "name" => recipe.name,
       "description" => recipe.description,
       "person_count" => recipe.person_count,
-      "instructions" => recipe.instructions,
-      "database_id" => recipe.database_id}
+      "instructions" => recipe.instructions})
+    assert json_response(conn, 200)["data"]["recipes_ingredients"] != []
+    assert json_response(conn, 200)["data"]["recipes_ingredients"] |> Enum.any?(fn(ri) -> 
+      ri |> map_inclusion(%{"ingredient_id" => recipe_ingredient.ingredient_id, "quantity" => recipe_ingredient.quantity})
+    end)
   end
 
   test "renders page not found when id is nonexistent", %{conn: conn} do
@@ -37,6 +53,23 @@ defmodule Alastair.RecipeControllerTest do
     assert Repo.get_by(Recipe, @valid_attrs)
   end
 
+  test "creates and renders resource when data is valid and ingredients are attached", %{conn: conn} do
+    %{:ml => ml} = Alastair.Seeds.MeasurementSeed.run()
+    ingredient = Repo.insert! %Alastair.Ingredient{
+      name: "Cream",
+      description: "Milkproduct",
+      default_measurement_id: ml.id
+    }
+
+    conn = post conn, recipe_path(conn, :create), recipe: Map.put(@valid_attrs, :recipes_ingredients, [%{ingredient_id: ingredient.id, quantity: 100.0}])
+    assert json_response(conn, 201)["data"]["id"]
+    assert Repo.get_by(Recipe, @valid_attrs)
+    assert json_response(conn, 201)["data"]["recipes_ingredients"] != []
+    assert json_response(conn, 201)["data"]["recipes_ingredients"] |> Enum.any?(fn(ri) -> 
+      ri |> map_inclusion(%{"ingredient_id" => ingredient.id, "quantity" => 100.0})
+    end)
+  end
+
   test "does not create resource and renders errors when data is invalid", %{conn: conn} do
     conn = post conn, recipe_path(conn, :create), recipe: @invalid_attrs
     assert json_response(conn, 422)["errors"] != %{}
@@ -47,6 +80,30 @@ defmodule Alastair.RecipeControllerTest do
     conn = put conn, recipe_path(conn, :update, recipe), recipe: @valid_attrs
     assert json_response(conn, 200)["data"]["id"]
     assert Repo.get_by(Recipe, @valid_attrs)
+  end
+
+  test "updates and renders chosen resource when data is valid and ingredients are attached", %{conn: conn} do
+    %{:ml => ml} = Alastair.Seeds.MeasurementSeed.run()
+    ingredient = Repo.insert! %Alastair.Ingredient{
+      name: "Cream",
+      description: "Milkproduct",
+      default_measurement_id: ml.id
+    }
+    recipe = Repo.insert! %Recipe{description: "some content", instructions: "some content", name: "some content", person_count: 42}
+
+    Repo.insert! %Alastair.RecipeIngredient{
+      recipe: recipe,
+      ingredient: ingredient,
+      quantity: 50.0
+    }    
+
+    conn = put conn, recipe_path(conn, :update, recipe), recipe: Map.put(@valid_attrs, :recipes_ingredients, [%{ingredient_id: ingredient.id, quantity: 100.0}])
+    assert json_response(conn, 200)["data"]["id"]
+    assert Repo.get_by(Recipe, @valid_attrs)
+    assert json_response(conn, 200)["data"]["recipes_ingredients"] != []
+    assert json_response(conn, 200)["data"]["recipes_ingredients"] |> Enum.any?(fn(ri) -> 
+      ri |> map_inclusion(%{"ingredient_id" => ingredient.id, "quantity" => 100.0})
+    end)
   end
 
   test "does not update chosen resource and renders errors when data is invalid", %{conn: conn} do

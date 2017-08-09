@@ -18,5 +18,7 @@ defmodule Alastair.Review do
     |> cast(params, [:rating, :review, :user_id, :recipe_id])
     |> validate_required([:rating, :review, :user_id, :recipe_id])
     |> foreign_key_constraint(:recipe_id)
+    |> validate_number(:rating, greater_than_or_equal_to: 0)
+    |> validate_number(:rating, less_than_or_equal_to: 5)
   end
 end

@@ -23,10 +23,11 @@ defmodule Alastair.MealController do
 
     case Repo.insert(changeset) do
       {:ok, meal} ->
-        meal_params["recipes"]
-        |> Enum.uniq_by(fn(x) -> x["recipe_id"] end)
-        |> Enum.map(fn(x) -> create_meal_recipe(x["recipe_id"], meal.id, x["person_count"]) end)
-
+        if Map.get(meal_params, "meals_recipes", nil) != nil do
+          meal_params["meals_recipes"]
+          |> Enum.uniq_by(fn(x) -> x["recipe_id"] end)
+          |> Enum.map(fn(x) -> create_meal_recipe(x["recipe_id"], meal.id, x["person_count"]) end)
+        end
         meal = Repo.preload(meal, [{:meals_recipes, [:recipe]}])
 
         conn
@@ -55,12 +56,14 @@ defmodule Alastair.MealController do
     case Repo.update(changeset) do
       {:ok, meal} ->
 
-        from(p in MealRecipe, where: p.meal_id == ^meal.id) |> Repo.delete_all
+        if Map.get(meal_params, "meals_recipes", nil) != nil do
+          from(p in MealRecipe, where: p.meal_id == ^meal.id) |> Repo.delete_all
 
-        meal_params["recipes"]
-        |> Enum.uniq_by(fn(x) -> x["recipe_id"] end)
-        |> Enum.map(fn(x) -> create_meal_recipe(x["recipe_id"], meal.id, x["person_count"]) end)
-
+          meal_params["meals_recipes"]
+          |> Enum.uniq_by(fn(x) -> x["recipe_id"] end)
+          |> Enum.map(fn(x) -> create_meal_recipe(x["recipe_id"], meal.id, x["person_count"]) end)
+        end
+        
         meal = Repo.preload(meal, [{:meals_recipes, [:recipe]}])
 
         render(conn, "show.json", meal: meal)

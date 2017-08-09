@@ -1,5 +1,6 @@
 defmodule Alastair.ShoppingItemControllerTest do
-  use Alastair.ConnCase
+  use Alastair.ConnCase, async: false
+  require Logger
 
   alias Alastair.ShoppingItem
   @valid_attrs %{buying_quantity: "120.5", comment: "some content", price: "120.5"}
@@ -10,54 +11,184 @@ defmodule Alastair.ShoppingItemControllerTest do
   end
 
   test "lists all entries on index", %{conn: conn} do
-    conn = get conn, shopping_item_path(conn, :index)
+    %{:euro => euro} = Alastair.Seeds.CurrencySeed.run
+    shop = Repo.insert! %Alastair.Shop{
+      name: "blablabla",
+      location: "blablabla",
+      currency: euro
+    }
+    conn = get conn, shop_shopping_item_path(conn, :index, shop)
     assert json_response(conn, 200)["data"] == []
   end
 
   test "shows chosen resource", %{conn: conn} do
-    shopping_item = Repo.insert! %ShoppingItem{}
-    conn = get conn, shopping_item_path(conn, :show, shopping_item)
-    assert json_response(conn, 200)["data"] == %{"id" => shopping_item.id,
+    %{:ml => ml} = Alastair.Seeds.MeasurementSeed.run()
+    ingredient = Repo.insert! %Alastair.Ingredient{
+      name: "Cream",
+      description: "Milkproduct",
+      default_measurement_id: ml.id
+    }
+
+    %{:euro => euro} = Alastair.Seeds.CurrencySeed.run
+    shop = Repo.insert! %Alastair.Shop{
+      name: "blablabla",
+      location: "blablabla",
+      currency: euro
+    }
+
+    shopping_item = Alastair.Repo.insert! %Alastair.ShoppingItem{
+      name: "Supercream",
+      buying_quantity: 2500.0,
+      flexible_amount: false,
+      price: 1.39,
+      mapped_ingredient: ingredient,
+      shop: shop
+    }
+
+    conn = get conn, shop_shopping_item_path(conn, :show, shop, shopping_item)
+    assert json_response(conn, 200)["data"] |> map_inclusion(%{"id" => shopping_item.id,
       "comment" => shopping_item.comment,
       "buying_quantity" => shopping_item.buying_quantity,
       "mapped_ingredient_id" => shopping_item.mapped_ingredient_id,
       "price" => shopping_item.price,
-      "shop_id" => shopping_item.shop_id}
+      "flexible_amount" => shopping_item.flexible_amount})
   end
 
   test "renders page not found when id is nonexistent", %{conn: conn} do
     assert_error_sent 404, fn ->
-      get conn, shopping_item_path(conn, :show, -1)
+      %{:euro => euro} = Alastair.Seeds.CurrencySeed.run
+      shop = Repo.insert! %Alastair.Shop{
+        name: "blablabla",
+        location: "blablabla",
+        currency: euro
+      }
+
+      get conn, shop_shopping_item_path(conn, :show, shop, -1)
     end
   end
 
   test "creates and renders resource when data is valid", %{conn: conn} do
-    conn = post conn, shopping_item_path(conn, :create), shopping_item: @valid_attrs
+    %{:ml => ml} = Alastair.Seeds.MeasurementSeed.run
+    ingredient = Repo.insert! %Alastair.Ingredient{
+      name: "Cream",
+      description: "Milkproduct",
+      default_measurement_id: ml.id
+    }
+
+    %{:euro => euro} = Alastair.Seeds.CurrencySeed.run
+    shop = Repo.insert! %Alastair.Shop{
+      name: "blablabla",
+      location: "blablabla",
+      currency: euro
+    }
+
+    valid_attrs = %{
+      name: "Supercream",
+      buying_quantity: 2500.0,
+      flexible_amount: false,
+      price: 1.39,
+      mapped_ingredient_id: ingredient.id,
+      shop_id: shop.id
+    }
+
+    conn = post conn, shop_shopping_item_path(conn, :create, shop), shopping_item: valid_attrs
     assert json_response(conn, 201)["data"]["id"]
-    assert Repo.get_by(ShoppingItem, @valid_attrs)
+    assert Repo.get_by(ShoppingItem, valid_attrs)
   end
 
   test "does not create resource and renders errors when data is invalid", %{conn: conn} do
-    conn = post conn, shopping_item_path(conn, :create), shopping_item: @invalid_attrs
+    %{:euro => euro} = Alastair.Seeds.CurrencySeed.run
+    shop = Repo.insert! %Alastair.Shop{
+      name: "blablabla",
+      location: "blablabla",
+      currency: euro
+    }
+
+    conn = post conn, shop_shopping_item_path(conn, :create, shop), shopping_item: @invalid_attrs
     assert json_response(conn, 422)["errors"] != %{}
   end
 
   test "updates and renders chosen resource when data is valid", %{conn: conn} do
-    shopping_item = Repo.insert! %ShoppingItem{}
-    conn = put conn, shopping_item_path(conn, :update, shopping_item), shopping_item: @valid_attrs
+    %{:ml => ml} = Alastair.Seeds.MeasurementSeed.run()
+    ingredient = Repo.insert! %Alastair.Ingredient{
+      name: "Cream",
+      description: "Milkproduct",
+      default_measurement_id: ml.id
+    }
+
+    %{:euro => euro} = Alastair.Seeds.CurrencySeed.run
+    shop = Repo.insert! %Alastair.Shop{
+      name: "blablabla",
+      location: "blablabla",
+      currency: euro
+    }
+
+    shopping_item = Alastair.Repo.insert!(%Alastair.ShoppingItem{
+      name: "Supercream",
+      buying_quantity: 2500.0,
+      flexible_amount: false,
+      price: 1.39,
+      mapped_ingredient: ingredient,
+      shop: shop
+    })    
+
+    conn = put conn, shop_shopping_item_path(conn, :update, shop, shopping_item), shopping_item: @valid_attrs
     assert json_response(conn, 200)["data"]["id"]
     assert Repo.get_by(ShoppingItem, @valid_attrs)
   end
 
   test "does not update chosen resource and renders errors when data is invalid", %{conn: conn} do
-    shopping_item = Repo.insert! %ShoppingItem{}
-    conn = put conn, shopping_item_path(conn, :update, shopping_item), shopping_item: @invalid_attrs
+    %{:ml => ml} = Alastair.Seeds.MeasurementSeed.run()
+    ingredient = Repo.insert! %Alastair.Ingredient{
+      name: "Cream",
+      description: "Milkproduct",
+      default_measurement_id: ml.id
+    }
+
+    %{:euro => euro} = Alastair.Seeds.CurrencySeed.run
+    shop = Repo.insert! %Alastair.Shop{
+      name: "blablabla",
+      location: "blablabla",
+      currency: euro
+    }
+
+    shopping_item = Alastair.Repo.insert!(%Alastair.ShoppingItem{
+      name: "Supercream",
+      buying_quantity: 2500.0,
+      flexible_amount: false,
+      price: 1.39,
+      mapped_ingredient: ingredient,
+      shop: shop
+    })
+
+    conn = put conn, shop_shopping_item_path(conn, :update, shop, shopping_item), shopping_item: %{price: -1.2}
     assert json_response(conn, 422)["errors"] != %{}
   end
 
   test "deletes chosen resource", %{conn: conn} do
-    shopping_item = Repo.insert! %ShoppingItem{}
-    conn = delete conn, shopping_item_path(conn, :delete, shopping_item)
+    %{:ml => ml} = Alastair.Seeds.MeasurementSeed.run()
+    ingredient = Repo.insert! %Alastair.Ingredient{
+      name: "Cream",
+      description: "Milkproduct",
+      default_measurement_id: ml.id
+    }
+
+    %{:euro => euro} = Alastair.Seeds.CurrencySeed.run
+    shop = Repo.insert! %Alastair.Shop{
+      name: "blablabla",
+      location: "blablabla",
+      currency: euro
+    }
+
+    shopping_item = Alastair.Repo.insert!(%Alastair.ShoppingItem{
+      name: "Supercream",
+      buying_quantity: 2500.0,
+      flexible_amount: false,
+      price: 1.39,
+      mapped_ingredient: ingredient,
+      shop: shop
+    })
+    conn = delete conn, shop_shopping_item_path(conn, :delete, shop, shopping_item)
     assert response(conn, 204)
     refute Repo.get(ShoppingItem, shopping_item.id)
   end

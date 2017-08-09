@@ -5,6 +5,8 @@ defmodule Alastair.Event do
   @derive {Phoenix.Param, key: :id}
   schema "events" do
     belongs_to :shop, Alastair.Shop
+
+    has_many :meals, Alastair.Meal
   end
 
   @doc """

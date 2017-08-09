@@ -2,7 +2,6 @@ defmodule Alastair.EventController do
   use Alastair.Web, :controller
 
   alias Alastair.Event
-  alias Alastair.Meal
 
   def get_event(id) do
     case Repo.get_by(Event, id: id) do
@@ -45,15 +44,4 @@ defmodule Alastair.EventController do
         |> render(Alastair.ChangesetView, "error.json", changeset: changeset)
     end
   end
-
-  def shopping_list(conn, %{"event_id" => event_id}) do
-
-    meals = from(p in Meal, 
-      where: p.event_id == ^event_id,
-      preload: [{:meals_recipes, [{:recipe, [{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}]}]}]) # lol
-    |> Repo.all
-
-    send_resp(conn, :no_content, "")
-  end
-
 end

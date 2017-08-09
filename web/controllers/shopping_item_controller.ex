@@ -9,6 +9,7 @@ defmodule Alastair.ShoppingItemController do
   end
 
   def create(conn, %{"shopping_item" => shopping_item_params, "shop_id" => shop_id}) do
+    shopping_item_params = Map.put(shopping_item_params, "shop_id", shop_id)
     changeset = ShoppingItem.changeset(%ShoppingItem{}, shopping_item_params)
 
     case Repo.insert(changeset) do
@@ -33,13 +34,14 @@ defmodule Alastair.ShoppingItemController do
     render(conn, "show.json", shopping_item: shopping_item)
   end
 
-  def update(conn, %{"id" => id, "shopping_item" => shopping_item_params}) do
+  def update(conn, %{"id" => id, "shopping_item" => shopping_item_params, "shop_id" => shop_id}) do
     shopping_item = Repo.get!(ShoppingItem, id)
-    |> Repo.preload([:mapped_ingredient])
-    changeset = ShoppingItem.changeset(shopping_item, shopping_item_params)
+    changeset = ShoppingItem.changeset(shopping_item, Map.put(shopping_item_params, "shop_id", shop_id))
 
     case Repo.update(changeset) do
       {:ok, shopping_item} ->
+        shopping_item = Repo.preload(shopping_item, [:mapped_ingredient])
+
         render(conn, "show.json", shopping_item: shopping_item)
       {:error, changeset} ->
         conn

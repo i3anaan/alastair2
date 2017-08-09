@@ -21,9 +21,11 @@ defmodule Alastair.RecipeController do
     case Repo.insert(changeset) do
       {:ok, recipe} ->
 
-        recipe_params["ingredients"]
-        |> Enum.uniq_by(fn(x) -> x["ingredient_id"] end) # TODO merge duplicate ingredients into one
-        |> Enum.map(fn(x) -> create_recipe_ingredient(recipe.id, x["ingredient_id"], x["quantity"]) end)
+        if Map.get(recipe_params, "recipes_ingredients", nil) != nil do
+          recipe_params["recipes_ingredients"]
+          |> Enum.uniq_by(fn(x) -> x["ingredient_id"] end) # TODO merge duplicate ingredients into one
+          |> Enum.map(fn(x) -> create_recipe_ingredient(recipe.id, x["ingredient_id"], x["quantity"]) end)
+        end
 
         recipe = Repo.preload(recipe, [{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}])
 
@@ -51,11 +53,13 @@ defmodule Alastair.RecipeController do
     case Repo.update(changeset) do
       {:ok, recipe} ->
         # Delete all ingredients and add all again
-        from(p in RecipeIngredient, where: p.recipe_id == ^recipe.id) |> Repo.delete_all
+        if Map.get(recipe_params, "recipes_ingredients", nil) != nil do
+          from(p in RecipeIngredient, where: p.recipe_id == ^recipe.id) |> Repo.delete_all
 
-        recipe_params["ingredients"]
-        |> Enum.uniq_by(fn(x) -> x["ingredient_id"] end) # TODO merge duplicate ingredients into one
-        |> Enum.map(fn(x) -> create_recipe_ingredient(recipe.id, x["ingredient_id"], x["quantity"]) end)
+          recipe_params["recipes_ingredients"]
+          |> Enum.uniq_by(fn(x) -> x["ingredient_id"] end) # TODO merge duplicate ingredients into one
+          |> Enum.map(fn(x) -> create_recipe_ingredient(recipe.id, x["ingredient_id"], x["quantity"]) end)
+        end
 
         recipe = Repo.preload(recipe, [{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}])
 

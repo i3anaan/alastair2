@@ -10,123 +10,13 @@
 # We recommend using the bang functions (`insert!`, `update!`
 # and so on) as they will fail if something goes wrong.
 
+currencies = Alastair.Seeds.CurrencySeed.run()
+measurements = Alastair.Seeds.MeasurementSeed.run()
+#Alastair.Seeds.IngredientSeed.run(measurements)
 
-ml = Alastair.Repo.insert!(%Alastair.Measurement{
-	name: "Milliliter",
-	plural_name: "Milliliters",
-	display_code: "ml"
-})
-
-l = Alastair.Repo.insert!(%Alastair.Measurement{
-	name: "Liter",
-	plural_name: "Liters",
-	display_code: "l"
-})
-
-g = Alastair.Repo.insert!(%Alastair.Measurement{
-	name: "Gram",
-	plural_name: "Grams",
-	display_code: "g"
-})
-
-kg = Alastair.Repo.insert!(%Alastair.Measurement{
-	name: "Kilogram",
-	plural_name: "Kilograms",
-	display_code: "kg"
-})
-
-pieces = Alastair.Repo.insert!(%Alastair.Measurement{
-	name: "Piece",
-	plural_name: "Pieces",
-	display_code: "pc"
-})
-
-euro = Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Euro",
-	display_code: "€"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Romanian Lei",
-	display_code: "lei"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Hungarian forint",
-	display_code: "Ft"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "US Dollar",
-	display_code: "$"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Swiss Franc",
-	display_code: "Fr"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Bulgarian lev",
-	display_code: "лв"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "British Pound",
-	display_code: "£"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Ukrainian hryvnia",
-	display_code: "₴"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Turkish lira",
-	display_code: "₺"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Russian ruble",
-	display_code: "₽"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Moldovan leu",
-	display_code: "L"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Czech koruna",
-	display_code: "Kč"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Polish złoty",
-	display_code: "zł"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Danish krone",
-	display_code: "kr"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Croatian kuna",
-	display_code: "kn"
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Serbian dinar",
-	display_code: "din."
-})
-
-Alastair.Repo.insert!(%Alastair.Currency{
-	name: "Swedish krona",
-	display_code: "kr"
-})
-
-
+# All following seeds are for testing purposes and should be removed
+%{:euro => euro} = currencies
+%{:ml => ml, :g => g} = measurements
 
 Alastair.Repo.insert!(%Alastair.Ingredient{
 	name: "Cream",

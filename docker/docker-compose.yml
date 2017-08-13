@@ -1,0 +1,33 @@
+version: '2'
+
+services:
+    alastair:
+        image: aegee/alastair:dev
+        volumes:
+            - ./alastair:/usr/src/myapp
+        links:
+            - postgres-alastair
+        expose:
+            - "4000"
+        labels:
+            - "traefik.frontend.rule=HostRegexp:{domain:[a-z]+};PathPrefix:/services/alastair;PathPrefixStrip:/services/alastair"
+            - "traefik.frontend.priority=100"
+            - "traefik.port=4000"
+            - "traefik.backend=alastair"
+            - "traefik.enable=true"
+            - "registry.modules=/static/getModules.json"
+
+    postgres-alastair:
+        image: postgres:latest
+        volumes:
+            - postgres-alastair:/var/lib/postgresql/data
+        expose:
+            - "5432"
+        environment:
+            POSTGRES_DB: alastair
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+
+volumes:
+    postgres-alastair:
+        driver: "local"

@@ -1,0 +1,10 @@
+{
+  "name": "Alastair",
+  "code": "alastair-cookie",
+  "pages": [{
+  	"name": "Food planning",
+  	"code": "alastair",
+  	"module_link": "static/js/alastair.js",
+  	"icon": "fa fa-ticket"
+  }]
+}

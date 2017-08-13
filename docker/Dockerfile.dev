@@ -1,0 +1,14 @@
+FROM elixir:1.5.1-alpine
+
+RUN mkdir -p /usr/src/myapp \
+	&& mkdir -p /usr/src/scripts \
+	&& mix local.hex --force \
+	&& apk add --update --no-cache nodejs nodejs-npm
+
+ADD bootstrap.sh /usr/src/scripts/bootstrap.sh
+
+WORKDIR /usr/src/myapp
+
+EXPOSE 4000
+
+CMD ash /usr/src/scripts/bootstrap.sh && mix phoenix.server

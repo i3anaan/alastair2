@@ -19,5 +19,4 @@ defmodule Alastair.ShoppingListControllerTest do
     assert json_response(conn, 200)["data"] |> is_list
     refute json_response(conn, 200)["data"] |> Enum.empty?
   end
-
 end

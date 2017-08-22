@@ -7,6 +7,10 @@ defmodule Alastair.Repo.Migrations.CreateRecipe do
       add :description, :text
       add :person_count, :integer
       add :instructions, :text
+      add :published, :boolean
+      add :created_by, :string
+      add :version, :integer
+      add :root_version_id, :integer
 
       add :avg_review, :float
 

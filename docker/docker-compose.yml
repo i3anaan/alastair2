@@ -5,7 +5,7 @@ services:
         image: aegee/alastair:dev
         volumes:
             - ./alastair:/usr/src/myapp
-        links:
+        depends_on:
             - postgres-alastair
         expose:
             - "4000"

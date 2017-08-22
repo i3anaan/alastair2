@@ -17,6 +17,9 @@ defmodule Alastair.RecipeView do
       person_count: recipe.person_count,
       instructions: recipe.instructions,
       avg_review: recipe.avg_review,
+      published: recipe.published,
+      created_by: recipe.created_by,
+      version: recipe.version,
       database_id: Map.get(recipe, :database_id, nil),
       recipes_ingredients: render_assoc_many(recipe.recipes_ingredients, Alastair.RecipeView, "recipe_ingredient.json")
     }

@@ -2,7 +2,7 @@ defmodule Alastair.Router do
   use Alastair.Web, :router
 
   def fetch_user(conn, _) do
-    assign(conn, :user, %{id: "asd123", first_name: "Nico", last_name: "Westerbeck"})
+    assign(conn, :user, %{id: "asd123", first_name: "Nico", last_name: "Westerbeck", superadmin: false})
   end
 
   pipeline :api do

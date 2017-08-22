@@ -41,16 +41,17 @@ defmodule Alastair.MealController do
     end
   end
 
-  def show(conn, %{"id" => id}) do
-    meal = Repo.get!(Meal, id)
+  def show(conn, %{"id" => id, "event_id" => event_id}) do
+    # Use complicated syntax to make sure you can not escalade privileges
+    meal = from(p in Meal, where: p.id == ^id and p.event_id == ^event_id) |> Repo.one!
     |> Repo.preload([{:meals_recipes, [:recipe]}])
 
     render(conn, "show.json", meal: meal)
   end
 
-  def update(conn, %{"id" => id, "meal" => meal_params}) do
+  def update(conn, %{"id" => id, "meal" => meal_params, "event_id" => event_id}) do
     # TODO check if user has access rights
-    meal = Repo.get!(Meal, id)
+    meal = from(p in Meal, where: p.id == ^id and p.event_id == ^event_id) |> Repo.one!
     changeset = Meal.changeset(meal, meal_params)
 
     case Repo.update(changeset) do
@@ -74,8 +75,8 @@ defmodule Alastair.MealController do
     end
   end
 
-  def delete(conn, %{"id" => id}) do
-    Repo.get!(Meal, id) |> Repo.delete!
+  def delete(conn, %{"id" => id, "event_id" => event_id}) do
+    from(p in Meal, where: p.id == ^id and p.event_id == ^event_id) |> Repo.one! |> Repo.delete!
 
     from(p in MealRecipe, where: p.meal_id == ^id) |> Repo.delete_all
 

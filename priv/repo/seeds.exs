@@ -14,4 +14,7 @@
 #measurements = Alastair.Seeds.MeasurementSeed.run()
 #Alastair.Seeds.IngredientSeed.run(measurements)
 
-Alastair.Seeds.ExampleSeed.run
+measurements = Alastair.Repo.all(Alastair.Measurement)
+if Enum.empty?(measurements) do
+  Alastair.Seeds.ExampleSeed.run
+end

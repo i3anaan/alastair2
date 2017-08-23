@@ -2,7 +2,8 @@ defmodule Alastair.Router do
   use Alastair.Web, :router
 
   def fetch_user(conn, _) do
-    assign(conn, :user, %{id: "asd123", first_name: "Nico", last_name: "Westerbeck", superadmin: false})
+    user_service = Application.get_env(:alastair, Alastair.Endpoint)[:user_service]
+    apply(Alastair.User, user_service, [conn])
   end
 
   pipeline :api do
@@ -13,6 +14,8 @@ defmodule Alastair.Router do
   # Other scopes may use custom stacks.
   scope "/api", Alastair do
     pipe_through :api
+
+    get "/user", AdminsController, :own_user
 
     scope "/events/:event_id", as: :event do
       resources "/meals", MealController, except: [:new, :edit]

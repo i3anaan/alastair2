@@ -2,9 +2,19 @@
   "name": "Alastair",
   "code": "alastair-cookie",
   "pages": [{
-  	"name": "Food planning",
-  	"code": "alastair",
-  	"module_link": "static/js/alastair.js",
-  	"icon": "fa fa-ticket"
+  	"name": "Organizers view",
+  	"code": "alastair_organizer",
+  	"module_link": "static/organizers_view/organizers_view.js",
+  	"icon": "fa fa-lightbulb-o"
+  }, {
+  	"name": "Shop view",
+  	"code": "alastair_shopping",
+  	"module_link": "static/shopping_view/shopping_view.js",
+  	"icon": "fa fa-list"
+  }, {
+  	"name": "Chef view",
+  	"code": "alastair_chef",
+  	"module_link": "static/chef_view/chef_view.js",
+  	"icon": "fa fa-cutlery"
   }]
 }

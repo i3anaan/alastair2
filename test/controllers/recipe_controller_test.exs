@@ -4,7 +4,7 @@ defmodule Alastair.RecipeControllerTest do
   alias Alastair.Recipe
   @userid "asd123"
   @valid_attrs %{description: "some content", instructions: "some content", name: "some content", person_count: 42, published: false}
-  @invalid_attrs %{}
+  @invalid_attrs %{person_count: -2}
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
@@ -89,25 +89,29 @@ defmodule Alastair.RecipeControllerTest do
   end
 
   test "updates and renders chosen resource when data is valid", %{conn: conn} do
-    recipe = Repo.insert! %Recipe{created_by: @userid}
+    attrs = @valid_attrs
+    |> Map.put(:published, false)
+    conn = post conn, recipe_path(conn, :create), recipe: attrs
+    assert json_response(conn, 201)["data"]["id"]
+    recipe = json_response(conn, 201)["data"]["id"]
+
     conn = put conn, recipe_path(conn, :update, recipe), recipe: @valid_attrs
     assert json_response(conn, 200)["data"]["id"]
     assert Repo.get_by(Recipe, @valid_attrs)
   end
 
   test "updates and renders chosen resource when data is valid and ingredients are attached", %{conn: conn} do
+    attrs = @valid_attrs
+    |> Map.put(:published, false)
+    conn = post conn, recipe_path(conn, :create), recipe: attrs
+    assert json_response(conn, 201)["data"]["id"]
+    recipe = Repo.get!(Recipe, json_response(conn, 201)["data"]["id"])
+
     %{:ml => ml} = Alastair.Seeds.MeasurementSeed.run()
     ingredient = Repo.insert! %Alastair.Ingredient{
       name: "Cream",
       description: "Milkproduct",
       default_measurement_id: ml.id
-    }
-    recipe = Repo.insert! %Recipe{
-      description: "some content", 
-      instructions: "some content", 
-      name: "some content", 
-      person_count: 42,
-      created_by: @userid
     }
 
     Repo.insert! %Alastair.RecipeIngredient{
@@ -126,7 +130,12 @@ defmodule Alastair.RecipeControllerTest do
   end
 
   test "does not update chosen resource and renders errors when data is invalid", %{conn: conn} do
-    recipe = Repo.insert! %Recipe{created_by: @userid}
+    attrs = @valid_attrs
+    |> Map.put(:published, false)
+    conn = post conn, recipe_path(conn, :create), recipe: attrs
+    assert json_response(conn, 201)["data"]["id"]
+    recipe = json_response(conn, 201)["data"]["id"]
+
     conn = put conn, recipe_path(conn, :update, recipe), recipe: @invalid_attrs
     assert json_response(conn, 422)["errors"] != %{}
   end
@@ -166,6 +175,35 @@ defmodule Alastair.RecipeControllerTest do
     assert recipe.published
     recipe = Repo.get!(Recipe, recipe.id)
     refute recipe.published
+  end
+
+  test "only allows editing of the most recent recipe", %{conn: conn} do
+    attrs = @valid_attrs
+    |> Map.put(:published, true)
+    conn = post conn, recipe_path(conn, :create), recipe: attrs
+    assert json_response(conn, 201)["data"]["id"]
+    recipe1 = json_response(conn, 201)["data"]["id"]
+
+    attrs = @valid_attrs
+    |> Map.put(:name, "something-completely-different")
+    |> Map.delete(:published)
+    conn = put conn, recipe_path(conn, :update, recipe1), recipe: attrs
+    assert json_response(conn, 200)["data"]["id"]
+    recipe2 = json_response(conn, 200)["data"]["id"]
+
+    # Edit first one forbidden
+    attrs = @valid_attrs
+    |> Map.put(:name, "elsesomething")
+    |> Map.delete(:published)
+    conn = put conn, recipe_path(conn, :update, recipe1), recipe: attrs
+    assert json_response(conn, 405)
+
+    # Edit second one still allowed
+    attrs = @valid_attrs
+    |> Map.put(:name, "elsesomething")
+    |> Map.delete(:published)
+    conn = put conn, recipe_path(conn, :update, recipe2), recipe: attrs
+    assert json_response(conn, 200)
   end
 
   test "deletes chosen resource when unpublished", %{conn: conn} do

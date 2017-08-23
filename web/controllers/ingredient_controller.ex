@@ -1,11 +1,17 @@
 defmodule Alastair.IngredientController do
   use Alastair.Web, :controller
-
+  
+  import Alastair.Helper
   alias Alastair.Ingredient
 
-  def index(conn, _params) do
-    ingredients = Repo.all from p in Ingredient,
-            preload: [:default_measurement]
+  def index(conn, params) do
+    ingredients = from(p in Ingredient,
+            preload: [:default_measurement],
+            order_by: :name)
+    |> paginate(params)
+    |> search(params)
+    |> Repo.all
+
 
     render(conn, "index.json", ingredients: ingredients)
   end
@@ -48,12 +54,21 @@ defmodule Alastair.IngredientController do
   end
 
   def delete(conn, %{"id" => id}) do
-    ingredient = Repo.get!(Ingredient, id)
+    if conn.assigns.user.superadmin do
+      ingredient = Repo.get!(Ingredient, id)
 
-    # Here we use delete! (with a bang) because we expect
-    # it to always work (and if it does not, it will raise).
-    Repo.delete!(ingredient)
+      from(p in Alastair.RecipeIngredient, where: p.ingredient_id == ^id) |> Repo.delete_all
+      from(p in Alastair.ShoppingItem, where: p.mapped_ingredient_id == ^id) |> Repo.delete_all
 
-    send_resp(conn, :no_content, "")
+      # Here we use delete! (with a bang) because we expect
+      # it to always work (and if it does not, it will raise).
+      Repo.delete!(ingredient)
+
+      send_resp(conn, :no_content, "")
+    else
+      conn
+      |> put_status(:forbidden)
+      |> render(Alastair.ErrorView, "error.json", message: "You cannot delete ingredients")
+    end
   end
 end

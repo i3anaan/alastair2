@@ -12,14 +12,20 @@ x Event/Shop
 x Shopping list
 o Shop editors, shop permissions
 o Global editors
-o OMS integration
+x OMS integration
 x Shop listing, creation
 x Shopping items, mapping to ingredients
 x Validation errors in good Format
 x Tests
-o Mismatching measurements shopping_item/ingredient - idea: shopping_item - ingredient many to many?
+x Mismatching measurements shopping_item/ingredient - idea: shopping_item - ingredient many to many?
 o Alternative measurements in recipe
 
 Frontend
-o Serve static files on /static (I think it does that already)
-o Everything
+x Serve static files on /static (I think it does that already)
+x Ingredient view
+x Chef welcome view
+x Recipe view
+o Single Recipe view
+o My recipe view
+o Stars directive
+o Simple user directive

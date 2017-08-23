@@ -26,12 +26,12 @@
   function config($stateProvider) {
     // State
     $stateProvider
-      .state('app.alastair', {
-        url: '/alastair',
+      .state('app.alastair_shopping', {
+        url: '/alastair/shopping/welcome',
         data: { pageTitle: 'Alastair' },
         views: {
           'pageContent@app': {
-            templateUrl: `${baseUrl}static/templates/welcome.html`,
+            templateUrl: `${baseUrl}static/shopping_view/welcome.html`,
             controller: 'WelcomeController as vm',
           },
         },
@@ -45,7 +45,7 @@
   }
 
   angular
-    .module('app.alastair', [])
+    .module('app.alastair_shopping', [])
     .config(config)
     .controller('WelcomeController', WelcomeController);
 })();

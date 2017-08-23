@@ -1,11 +1,18 @@
 defmodule Alastair.RecipeController do
   use Alastair.Web, :controller
 
+  import Alastair.Helper
   alias Alastair.Recipe
   alias Alastair.RecipeIngredient
 
-  def index(conn, _params) do
-    recipes = from(p in Recipe, where: p.published == true) |> Repo.all()
+  def index(conn, params) do
+    recipes = from(p in Recipe, 
+      where: p.published == true,
+      order_by: :name)
+    |> paginate(params)
+    |> search(params)
+    |> Repo.all
+    
     render(conn, "index.json", recipes: recipes)
   end
 
@@ -69,19 +76,30 @@ defmodule Alastair.RecipeController do
   defp update_unpublished(conn, recipe, recipe_params) do
     changeset = Recipe.changeset(recipe, recipe_params)
 
-    case Repo.update(changeset) do
-      {:ok, recipe} ->
-        # Delete all ingredients and add all again
-        if Map.get(recipe_params, "recipes_ingredients", nil) != nil do
-          reset_recipe_ingredients(recipe, recipe_params["recipes_ingredients"])
-        end
-        recipe = Repo.preload(recipe, [{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}], force: true)
+    # Check if this is the newest version, otherwise refuse the request
+    max_version = from(p in Recipe, where: p.root_version_id == ^recipe.root_version_id) |> Repo.all
+    |> Enum.map(fn(x) -> x.version end)
+    |> Enum.max(fn -> 0 end)
 
-        render(conn, "show.json", recipe: recipe)
-      {:error, changeset} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> render(Alastair.ChangesetView, "error.json", changeset: changeset)
+    if max_version <= recipe.version do
+      case Repo.update(changeset) do
+        {:ok, recipe} ->
+          # Delete all ingredients and add all again
+          if Map.get(recipe_params, "recipes_ingredients", nil) != nil do
+            reset_recipe_ingredients(recipe, recipe_params["recipes_ingredients"])
+          end
+          recipe = Repo.preload(recipe, [{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}], force: true)
+
+          render(conn, "show.json", recipe: recipe)
+        {:error, changeset} ->
+          conn
+          |> put_status(:unprocessable_entity)
+          |> render(Alastair.ChangesetView, "error.json", changeset: changeset)
+      end
+    else
+      conn
+      |> put_status(:method_not_allowed)
+      |> render(Alastair.ErrorView, "error.json", message: "You can only edit the most recent version of a recipe")
     end
   end
 
@@ -92,59 +110,56 @@ defmodule Alastair.RecipeController do
     |> Recipe.duplicate
     |> Recipe.changeset(recipe_params)
 
-    # Check if this is the newest version, otherwise refuse the request
-    max_version = from(p in Recipe, where: p.root_version_id == ^old_recipe.root_version_id) |> Repo.all
-    |> Enum.map(fn(x) -> x.version end)
-    |> Enum.max(fn -> 0 end)
+    # Set the published state of the old version to "unpublished" so it doesn't appear in listings anymore
+    old_recipe
+    |> Recipe.changeset
+    |> Ecto.Changeset.force_change(:published, false)
+    |> Repo.update!
 
-    # Check if our last recipe was the newest
-    if max_version > old_recipe.version do
-      conn
-      |> put_status(:method_not_allowed)
-      |> render(Alastair.ErrorView, "error.json", message: "You can only edit the most recent version of a recipe")
-    else
-      # Set the published state of the old version to "unpublished" so it doesn't appear in listings anymore
-      old_recipe
-      |> Recipe.changeset
-      |> Ecto.Changeset.force_change(:published, false)
-      |> Repo.update!
+    case Repo.insert(changeset) do
+      {:ok, recipe} ->
 
-      # TODO race condition when inserting another update after the version check
-      case Repo.insert(changeset) do
-        {:ok, recipe} ->
+        # Either use the recipes_ingredients from the request if present or otherwise copy over the old ones
+        if Map.get(recipe_params, "recipes_ingredients", nil) != nil do
+          reset_recipe_ingredients(recipe, recipe_params["recipes_ingredients"])
+        else
+          old_recipe.recipes_ingredients
+          |> Enum.map(fn(x) -> create_recipe_ingredient(recipe.id, x.ingredient_id, x.quantity) end)
+        end
 
-          # Either use the recipes_ingredients from the request if present or otherwise copy over the old ones
-          if Map.get(recipe_params, "recipes_ingredients", nil) != nil do
-            reset_recipe_ingredients(recipe, recipe_params["recipes_ingredients"])
-          else
-            old_recipe.recipes_ingredients
-            |> Enum.map(fn(x) -> create_recipe_ingredient(recipe.id, x.ingredient_id, x.quantity) end)
-          end
+        recipe = Repo.preload(recipe, [{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}], force: true)
 
-          recipe = Repo.preload(recipe, [{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}], force: true)
-
-          render(conn, "show.json", recipe: recipe)
-        {:error, changeset} ->
-          conn
-          |> put_status(:unprocessable_entity)
-          |> render(Alastair.ChangesetView, "error.json", changeset: changeset)
-      end
+        render(conn, "show.json", recipe: recipe)
+      {:error, changeset} ->
+        conn
+        |> put_status(:unprocessable_entity)
+        |> render(Alastair.ChangesetView, "error.json", changeset: changeset)
     end
   end
 
   def update(conn, %{"id" => id, "recipe" => recipe_params}) do
-    recipe = from(p in Recipe, where: p.id == ^id, preload: [:recipes_ingredients]) |> Repo.one!
-    # Only the user who created the recipe can still edit it
-    if recipe.created_by != conn.assigns.user.id && !conn.assigns.user.superadmin do
-      conn
-      |> put_status(:method_not_allowed)
-      |> render(Alastair.ErrorView, "error.json", message: "Only the original author of a recipe can edit it")
-    else
-      if recipe.published do
-        update_published(conn, recipe, recipe_params)
+    # Transaction is needed because old recipe and new recipe should be updated atomically
+    case Repo.transaction(fn ->
+      recipe = from(p in Recipe, where: p.id == ^id, preload: [:recipes_ingredients]) |> Repo.one!
+      # Only the user who created the recipe can still edit it
+      if recipe.created_by != conn.assigns.user.id && !conn.assigns.user.superadmin do
+        conn
+        |> put_status(:method_not_allowed)
+        |> render(Alastair.ErrorView, "error.json", message: "Only the original author of a recipe can edit it")
       else
-        update_unpublished(conn, recipe, recipe_params)
+        if recipe.published do
+          update_published(conn, recipe, recipe_params)
+        else
+          update_unpublished(conn, recipe, recipe_params)
+        end
       end
+    end) do
+      {:ok, conn} ->
+        conn
+      _ ->
+        conn
+        |> put_status(:internal_server_error)
+        |> render(Alastair.ErrorView, "error.json", message: "Something went wrong inside the transaction")
     end
   end
 

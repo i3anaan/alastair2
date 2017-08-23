@@ -28,6 +28,7 @@ defmodule Alastair.Recipe do
     |> cast(params, [:name, :description, :person_count, :instructions, :published])
     |> validate_required([:name, :person_count, :instructions])
     |> validate_number(:person_count, greater_than: 0)
+    |> validate_length(:name, min: 5, max: 100)
     |> validate_not_depublished
   end
 

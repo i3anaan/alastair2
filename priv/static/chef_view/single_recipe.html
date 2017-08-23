@@ -1,0 +1,18 @@
+<h1 class="page-header">{{ vm.recipe.name }} <small>by {{ vm.recipe.created_by }}</small></h1>
+
+<p class="alert alert-info">{{ vm.recipe.description }}</p>
+
+<table class="table table-responsive">
+  <tbody>
+    <tr ng-repeat="ri in vm.recipe.recipes_ingredients">
+      <td style="text-align: right;">{{ ri.quantity }}&nbsp;{{ ri.ingredient.default_measurement.display_code }}</td>
+      <td>{{ ri.ingredient.name }}</td>
+      <td><small><i>{{ ri.comment | limitTo:100 }}</i></small></td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note note-info">
+  <h4>Instructions</h4>
+  <p>{{ vm.recipe.instructions }}</p>
+</div>

@@ -12,6 +12,14 @@ defmodule Alastair.ErrorView do
     }
   end
 
+  def render("error.json", %{message: message, data: data}) do
+    %{
+      success: false,
+      error: message,
+      data: data
+    }
+  end
+
   def render("500.html", _assigns) do
     "Internal server error"
   end

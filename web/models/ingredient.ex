@@ -19,6 +19,8 @@ defmodule Alastair.Ingredient do
     struct
     |> cast(params, [:name, :description, :default_measurement_id])
     |> validate_required([:name, :default_measurement_id])
+    |> validate_length(:name, min: 2, max: 60)
+    |> validate_length(:description, max: 100)
     |> foreign_key_constraint(:default_measurement_id)
   end
 end

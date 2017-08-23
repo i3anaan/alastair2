@@ -73,7 +73,9 @@ defmodule Alastair.Seeds.ExampleSeed do
 			name: "Pasta with tomato sauce",
 			description: "A simple pasta recipe",
 			person_count: 4,
-			instructions: "Chop and fry vegetables, add water and boil pasta"
+			instructions: "Chop and fry vegetables, add water and boil pasta",
+			created_by: "asd123",
+			published: true
 		})
 
 		Alastair.Repo.insert!(%Alastair.RecipeIngredient{
@@ -85,7 +87,8 @@ defmodule Alastair.Seeds.ExampleSeed do
 		Alastair.Repo.insert!(%Alastair.RecipeIngredient{
 			recipe: recipe1,
 			ingredient: onions,
-			quantity: 200.0
+			quantity: 200.0,
+			comment: "Chop in dices"
 		})
 
 		Alastair.Repo.insert!(%Alastair.RecipeIngredient{
@@ -97,7 +100,8 @@ defmodule Alastair.Seeds.ExampleSeed do
 		Alastair.Repo.insert!(%Alastair.RecipeIngredient{
 			recipe: recipe1,
 			ingredient: tomatoes,
-			quantity: 400.0
+			quantity: 400.0,
+			comment: "Use fresh ones here"
 		})
 
 		Alastair.Repo.insert!(%Alastair.Review{

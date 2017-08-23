@@ -20,13 +20,13 @@ defmodule Alastair.RecipeView do
       published: recipe.published,
       created_by: recipe.created_by,
       version: recipe.version,
-      database_id: Map.get(recipe, :database_id, nil),
       recipes_ingredients: render_assoc_many(recipe.recipes_ingredients, Alastair.RecipeView, "recipe_ingredient.json")
     }
   end
 
   def render("recipe_ingredient.json", %{recipe: recipe_ingredient}) do
     %{quantity: recipe_ingredient.quantity,
+      comment: recipe_ingredient.comment,
       ingredient: render_assoc_one(recipe_ingredient.ingredient, Alastair.IngredientView, "ingredient.json"),
       ingredient_id: recipe_ingredient.ingredient_id
     }

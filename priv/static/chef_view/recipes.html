@@ -1,0 +1,41 @@
+<div class="row">
+  <div class="col-lg-6">
+    <div class="input-group">
+      <span class="input-group-addon"><i class="fa fa-search"></i></span>
+      <input class="form-control" type="text" ng-model="vm.search" ng-change="vm.resetData()" placeholder="Search ingredients">
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <a ui-sref="app.alastair_chef.single_recipe({id: 'new', create: true})" class="btn btn-success"><i class="fa fa-plus"></i>&nbsp;New</a>
+  </div>
+</div>
+
+<div class="row" infinite-scroll="vm.loadNextPage()" infinite-scroll-disabled="vm.block_infinite_scroll" infinite-scroll-distance="1">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Rating</th>
+          <th>Name</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="recipe in vm.data">
+            <td>{{ recipe.avg_review }}</td>
+            <td>
+              <a ui-sref="app.alastair_chef.single_recipe({id: recipe.id})">{{ recipe.name }}</a>
+            </td>
+            <td>{{ recipe.description | limitTo:100 }}<span ng-show="recipe.description.length>100">...</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div ng-show="vm.data.length === 0 && !vm.busy">
+    <p>No recipes in database with the current search</p>
+  </div>
+  <div ng-show="vm.busy">
+    <p>Searching...</p>
+  </div>
+</div>

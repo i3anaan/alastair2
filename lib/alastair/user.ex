@@ -6,13 +6,22 @@ defmodule Alastair.User do
     Plug.Conn.assign(conn, :user, %{id: "asd123", first_name: "Nico", last_name: "Westerbeck", superadmin: true})
   end
 
+  defp convert_to_string(anything) do
+    case anything do
+      n when is_float(n) -> to_string(n)
+      n when is_integer(n) -> to_string(n)
+      n when is_number(n) -> to_string(n)
+      n -> n
+    end
+  end
+
   # Parsing a response is a bit ugly...
   defp parse_oms_user(conn, response) do
     case Poison.decode(response.body) do
       {:ok, body} -> 
         atoms = [:id, :first_name, :last_name, :bodies, :is_superadmin] # Define which atoms to parse here
         relevant? = fn (x) -> Enum.find(atoms, fn(a) -> Atom.to_string(a) == x end) end
-        user = for {key, val} <- body["data"], relevant?.(key), into: %{}, do: {String.to_existing_atom(key), val}
+        user = for {key, val} <- body["data"], relevant?.(key), into: %{}, do: {String.to_existing_atom(key), convert_to_string(val)}
         user = user 
         |> Map.put(:superadmin, user.is_superadmin) # TODO fetch this from stored superadmins
         |> Map.delete(:is_superadmin)

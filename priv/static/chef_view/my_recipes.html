@@ -15,19 +15,18 @@
     <table class="table">
       <thead>
         <tr>
-          <th>Rating</th>
+          <th>Published</th>
           <th>Name</th>
           <th>Description</th>
         </tr>
       </thead>
       <tbody>
-        <tr ng-repeat="recipe in vm.data">
-            <td ng-show="recipe.avg_review"><oms-star-rating score="recipe.avg_review" max="5"></oms-star-rating></td>
-            <td ng-show="!recipe.avg_review">No reviews yet</td>
-            <td>
-              <a ui-sref="app.alastair_chef.single_recipe({id: recipe.id})">{{ recipe.name }}</a>
-            </td>
-            <td>{{ recipe.description | limitTo:100 }}<span ng-show="recipe.description.length>100">...</span></td>
+        <tr ng-repeat="recipe in vm.data"> 
+          <td>{{ recipe.published }}
+          <td>
+            <a ui-sref="app.alastair_chef.single_recipe({id: recipe.id})">{{ recipe.name }}</a>
+          </td>
+          <td>{{ recipe.description | limitTo:100 }}<span ng-show="recipe.description.length>100">...</span></td>
         </tr>
       </tbody>
     </table>

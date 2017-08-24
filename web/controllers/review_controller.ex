@@ -78,14 +78,15 @@ defmodule Alastair.ReviewController do
     end
   end
 
-  def delete(conn, %{"id" => id}) do
+  def delete(conn, %{"id" => id, "recipe_id" => recipe_id}) do
     review = Repo.get!(Review, id)
 
     # Here we use delete! (with a bang) because we expect
     # it to always work (and if it does not, it will raise).
     if(review.user_id == conn.assigns.user.id) do
       Repo.delete!(review)
-
+      Alastair.RecipeController.update_avg_review(recipe_id)
+      
       send_resp(conn, :no_content, "")
     else
       conn

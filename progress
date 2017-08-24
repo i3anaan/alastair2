@@ -19,6 +19,8 @@ x Validation errors in good Format
 x Tests
 x Mismatching measurements shopping_item/ingredient - idea: shopping_item - ingredient many to many?
 o Alternative measurements in recipe
+o Forward errors in recipes_ingredients and meals_recipes
+o Searching in multiple fields
 
 Frontend
 x Serve static files on /static (I think it does that already)

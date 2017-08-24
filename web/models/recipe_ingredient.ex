@@ -18,6 +18,6 @@ defmodule Alastair.RecipeIngredient do
     |> validate_length(:comment, max: 100)
     |> foreign_key_constraint(:recipe_id)
     |> foreign_key_constraint(:ingredient_id)
-    |> validate_number(:quantity, greater_than: 0)
+    |> validate_number(:quantity, greater_than_or_equal_to: 0)
   end
 end

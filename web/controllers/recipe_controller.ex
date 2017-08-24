@@ -16,15 +16,21 @@ defmodule Alastair.RecipeController do
     render(conn, "index.json", recipes: recipes)
   end
 
-  def index_mine(conn, _params) do
-    recipes = from(p in Recipe, where: p.created_by == ^conn.assigns.user.id) |> Repo.all()
+  def index_mine(conn, params) do
+    recipes = from(p in Recipe, 
+      where: p.created_by == ^conn.assigns.user.id,
+      order_by: :name)
+    |> paginate(params)
+    |> search(params)
+    |> Repo.all
+    
     render(conn, "index.json", recipes: recipes)
   end
 
   defp create_recipe_ingredient(recipe_id, ingredient_id, quantity) do
     changeset = RecipeIngredient.changeset(%RecipeIngredient{}, %{recipe_id: recipe_id, ingredient_id: ingredient_id, quantity: quantity})
     # TODO add error handling
-    Repo.insert!(changeset)
+    Repo.insert(changeset)
   end
 
   defp reset_recipe_ingredients(recipe, recipes_ingredients) do
@@ -33,6 +39,7 @@ defmodule Alastair.RecipeController do
     recipes_ingredients
     |> Enum.uniq_by(fn(x) -> x["ingredient_id"] end) # TODO merge duplicate ingredients into one
     |> Enum.map(fn(x) -> create_recipe_ingredient(recipe.id, x["ingredient_id"], x["quantity"]) end)
+    |> Enum.find({:ok, nil}, fn(x) -> elem(x, 1) == :error end)
   end
 
   def create(conn, %{"recipe" => recipe_params}) do
@@ -68,7 +75,7 @@ defmodule Alastair.RecipeController do
 
   def show(conn, %{"id" => id}) do
     recipe = Repo.get!(Recipe, id)
-      |> Repo.preload([{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}]) # Preload nested recipe_ingredient and ingredient and measurement
+      |> Repo.preload([{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}, :reviews]) # Preload nested recipe_ingredient and ingredient and measurement
     render(conn, "show.json", recipe: recipe)
   end
 

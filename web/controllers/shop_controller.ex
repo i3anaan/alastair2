@@ -1,11 +1,16 @@
 defmodule Alastair.ShopController do
   use Alastair.Web, :controller
+  import Alastair.Helper
 
   alias Alastair.Shop
 
-  def index(conn, _params) do
-    shops = Repo.all from p in Shop,
-            preload: [:currency]
+  def index(conn, params) do
+    shops = from(p in Shop,
+            preload: [:currency],
+            order_by: :name)
+    |> paginate(params)
+    |> search(params)
+    |> Repo.all
 
     render(conn, "index.json", shops: shops)
   end
@@ -51,14 +56,20 @@ defmodule Alastair.ShopController do
   end
 
   def delete(conn, %{"id" => id}) do
-    shop = Repo.get!(Shop, id)
+    if conn.assigns.user.superadmin do
+      shop = Repo.get!(Shop, id)
 
-    from(p in Alastair.ShoppingItem, where: p.shop_id == ^id) |> Repo.delete_all
+      from(p in Alastair.ShoppingItem, where: p.shop_id == ^id) |> Repo.delete_all
 
-    # Here we use delete! (with a bang) because we expect
-    # it to always work (and if it does not, it will raise).
-    Repo.delete!(shop)
+      # Here we use delete! (with a bang) because we expect
+      # it to always work (and if it does not, it will raise).
+      Repo.delete!(shop)
 
-    send_resp(conn, :no_content, "")
+      send_resp(conn, :no_content, "")
+    else
+      conn
+      |> put_status(:forbidden)
+      |> render(Alastair.ErrorView, "error.json", message: "Only admins can delete shops")
+    end
   end
 end

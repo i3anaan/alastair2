@@ -1,18 +1,166 @@
-<h1 class="page-header">{{ vm.recipe.name }} <small>by {{ vm.recipe.created_by }}</small></h1>
+<!-- TODO should be included in core -->
+<link rel="stylesheet" href="https://ghiden.github.io/angucomplete-alt/css/angucomplete-alt.css">
 
-<p class="alert alert-info">{{ vm.recipe.description }}</p>
+<span ng-show="!vm.create">
+  <h1 class="page-header">
+    {{ vm.recipe.name }} 
+    <small>for {{ vm.recipe.person_count }} persons by <oms-simple-user userid="{{vm.recipe.created_by}}"></oms-simple-user></small>
+  </h1>
 
-<table class="table table-responsive">
-  <tbody>
-    <tr ng-repeat="ri in vm.recipe.recipes_ingredients">
-      <td style="text-align: right;">{{ ri.quantity }}&nbsp;{{ ri.ingredient.default_measurement.display_code }}</td>
-      <td>{{ ri.ingredient.name }}</td>
-      <td><small><i>{{ ri.comment | limitTo:100 }}</i></small></td>
-    </tr>
-  </tbody>
-</table>
 
-<div class="note note-info">
-  <h4>Instructions</h4>
-  <p>{{ vm.recipe.instructions }}</p>
+  <p class="alert alert-info">{{ vm.recipe.description }}</p>
+
+  <table class="table table-responsive">
+    <tbody>
+      <tr ng-repeat="ri in vm.recipe.recipes_ingredients">
+        <td style="text-align: right;">{{ ri.quantity }}&nbsp;{{ ri.ingredient.default_measurement.display_code }}</td>
+        <td>{{ ri.ingredient.name }}</td>
+        <td><small><i>{{ ri.comment | limitTo:100 }}</i></small></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note note-info">
+    <h4>Instructions</h4>
+    <p>{{ vm.recipe.instructions }}</p>
+  </div>
+
+  <div>
+    <button type="button" class="btn btn-info" ng-click="vm.editRecipe()" ng-show="vm.permissions.edit_recipe"><i class="fa fa-pencil"></i>&nbsp;Edit</button>
+    <button type="button" class="btn btn-success" ng-click="vm.publishRecipe()" ng-show="vm.permissions.edit_recipe && !vm.recipe.published"><i class="fa fa-share"></i>&nbsp;Publish</button>
+    <button type="button" class="btn btn-success" ng-click="vm.addToMeal()" ng-show="vm.recipe.published"><i class="fa fa-bars"></i>&nbsp;Add to Meal</button>
+    <button type="button" class="btn btn-danger" ng-click="vm.deleteRecipe()" ng-show="vm.permissions.delete_recipe"><i class="fa fa-minus"></i>&nbsp;Delete</button>
+  </div>
+
+  <hr>
+
+  <div ng-show="vm.recipe.published">
+    <h3>Reviews 
+      <small ng-show="vm.recipe.avg_review"><oms-star-rating score="vm.recipe.avg_review", max="5"></oms-star-rating></small>
+      <small ng-show="!vm.recipe.avg_review">No reviews yet</small>
+    </h3>
+    <div class="input-group" ng-show="!vm.our_review">
+      <div class="input-group-btn">
+        <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
+          <oms-star-rating score="vm.review.rating", max="5"></oms-star-rating>
+          &nbsp;
+          <span class="caret"></span>
+        </button>
+        <ul class="dropdown-menu">
+          <li><a ng-click="vm.review.rating=0">0</a></li>
+          <li><a ng-click="vm.review.rating=1">1</a></li>
+          <li><a ng-click="vm.review.rating=2">2</a></li>
+          <li><a ng-click="vm.review.rating=3">3</a></li>
+          <li><a ng-click="vm.review.rating=4">4</a></li>
+          <li><a ng-click="vm.review.rating=5">5</a></li>
+        </ul>
+      </div>
+      <input type="text" class="form-control" ng-model="vm.review.review" placeholder="Enter your review here.">
+      <span class="input-group-btn">
+          <button class="btn btn-primary" type="button" ng-click="vm.sendReview()">Send</button>
+      </span>
+    </div>
+    <div class="input-group" ng-show="vm.our_review">
+      You already reviewed this recipe. <button type="button" class="btn btn-link" ng-click="vm.deleteReview()">Click to retract</button>
+    </div>
+    <ul class="chats">
+      <li class="left" ng-repeat="review in vm.recipe.reviews">
+        <span class="date-time"><oms-star-rating score="review.rating", max="5"></oms-star-rating></span>
+        <span class="name"><oms-simple-user userid="{{ review.user_id }}"></oms-simple-user></span>
+        <span class="image"><img alt="" src="assets/img/user-13.jpg" /></span>
+        <div class="message">{{ review.review }}</div>
+      </li>
+    </ul>
+  </div>
+</span>
+<span ng-show="vm.create">
+  <h1 class="page-header">Creating a new recipe</h1>
+  If you accidentally closed the modal, click <button type="button" ng-click="vm.newRecipe()">here</button>
+</span>
+
+
+
+
+<!-- ########################### Ingredient modal ###################### -->
+<div class="modal fade" id="recipeModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Recipe add/edit</h4>
+            </div>
+            <form name="recipeForm" ng-submit="vm.submitForm()" class="margin-bottom-0" novalidate>
+                <div class="modal-body">
+                    <div class="form-group m-b-20">
+                        <label for="name">Name*</label>
+                        <input type="text" class="form-control" ng-model="vm.edited_recipe.name" required />
+                        <p class="label label-danger" ng-show="vm.errors.name">{{ vm.errors.name }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="description">Description</label>
+                        <input type="text" class="form-control" ng-model="vm.edited_recipe.description" />
+                        <p class="label label-danger" ng-show="vm.errors.description">{{ vm.errors.description }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                      <label>Instructions*</label>
+                      <textarea class="form-control" ng-model="vm.edited_recipe.instructions" placeholder="How do you prepare this meal?" rows="5"></textarea>
+                      <p class="label label-danger" ng-show="vm.errors.instructions">{{ vm.errors.instructions }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                      <label>Persons*</label>
+                      <input type="number" class="form-control" ng-model="vm.edited_recipe.person_count" placeholder="How many people" required />
+                      <p class="label label-danger" ng-show="vm.errors.person_count">{{ vm.errors.person_count }}</p>
+                    </div>
+                    <h2>Ingredients <small>for {{ vm.edited_recipe.person_count }} persons</small></h2>
+                    <div class="row m-b-10 alert" style="background: #ddd;" ng-repeat="ri in vm.edited_recipe.recipes_ingredients">
+                      <div class="row">
+                        <div class="col-md-3">
+                          <div class="input-group">
+                            <input type="number" class="form-control" ng-model="ri.quantity">
+                            <span class="input-group-addon">{{ ri.ingredient.default_measurement.display_code }}</span>
+                          </div>
+                        </div>
+                        <div class="col-md-9">
+                          <label style="padding-top: 8px;" >{{ ri.ingredient.name }}</label>
+                          <button class="btn btn-sm btn-danger pull-right" ng-click="vm.edited_recipe.recipes_ingredients.splice($index, 1)"><i class="fa fa-minus"></i></button>
+                        </div>
+                      </div>
+                      <div class="row">
+                        <div class="col-md-12 input-group">
+                          <input type="text" class="form-control" ng-model="ri.comment" placeholder="Add a comment">
+                          <span class="input-group-addon">Comment</span>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row m-b-10 alert" style="background: #ddd;">
+                      <div class="row">
+                        <div class="col-md-3">
+                          <div class="input-group">
+                            <input type="number" class="form-control" disabled placeholder="Add new">
+                          </div>
+                        </div>
+                        <div class="col-md-9">
+                          <angucomplete-alt class="pull-left"
+                            id="ingredientAutocomplete"
+                            placeholder="Search ingredients"
+                            pause="50"
+                            selected-object="tmpIngredient"
+                            remote-api-handler="vm.fetchIngredients"
+                            title-field="name"
+                            description-field="description"
+                            minlength="1"
+                            input-class="form-control form-control-small">
+                          </angucomplete-alt>
+                          <button type="button" class="btn btn-sm btn-success pull-right" ng-click="vm.addIngredient(tmpIngredient)"><i class="fa fa-plus"></i></button>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
+                    <button type="submit" ng-disabled="bodyForm.$pristine || bodyForm.$invalid" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Save </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>

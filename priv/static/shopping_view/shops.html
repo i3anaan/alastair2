@@ -1,0 +1,83 @@
+<div class="row">
+  <div class="col-lg-6">
+    <div class="input-group">
+      <span class="input-group-addon"><i class="fa fa-search"></i></span>
+      <input class="form-control" type="text" ng-model="vm.search" ng-change="vm.resetData()" placeholder="Search shops">
+    </div>
+  </div>
+  <div class="col-lg-6" >
+    <button class="btn btn-success" ng-click="vm.newShop()"><i class="fa fa-plus"></i>&nbsp;New</button>
+  </div>
+</div>
+
+<div class="row" infinite-scroll="vm.loadNextPage()" infinite-scroll-disabled="vm.block_infinite_scroll" infinite-scroll-distance="1">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Location</th>
+          <th>Currency</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="shop in vm.data">
+          <td><a ui-sref="app.alastair_shop.items({id: shop.id})">{{ shop.name }}</a></td>
+          <td>{{ shop.location }}</td>
+          <td>{{ shop.currency.name }}</td>
+          <td>
+            <button type="button" class="btn btn-sm btn-primary" ng-click="vm.editShop(shop)"><i class="fa fa-pencil"></i></button>
+            <a ui-sref="app.alastair_shop.items({id: shop.id})" class="btn btn-sm btn-info"><i class="fa fa-list"></i></a>
+            <button type="button" class="btn btn-sm btn-danger" ng-click="vm.deleteShop(shop)"><i class="fa fa-minus"></i></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div ng-show="vm.data.length === 0 && !vm.busy">
+    <p>No shops in database with the current search</p>
+  </div>
+  <div ng-show="vm.busy">
+    <p>Searching...</p>
+  </div>
+</div>
+
+
+
+
+<!-- ########################### Ingredient modal ###################### -->
+<div class="modal fade" id="shopModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Ingredient add/edit</h4>
+            </div>
+            <form name="shopForm" ng-submit="vm.submitForm()" class="margin-bottom-0" novalidate>
+                <div class="modal-body">
+                    <div class="form-group m-b-20">
+                        <label for="name">Name*</label>
+                        <input type="text" class="form-control" ng-model="vm.edited_shop.name" required />
+                        <p class="label label-danger" ng-show="vm.errors.name">{{ vm.errors.name }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="name">Location</label>
+                        <input type="text" class="form-control" ng-model="vm.edited_shop.location" />
+                        <p class="label label-danger" ng-show="vm.errors.location">{{ vm.errors.location }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label for="name">Currency*</label>
+                        <select class="form-control" ng-model="vm.edited_shop.currency_id" ng-options="currency.id as currency.name for currency in vm.currencies" required></select> 
+                        <p class="label label-danger" ng-show="vm.errors.currency_id">{{ vm.errors.currency_id }}</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
+                    <button type="submit" ng-disabled="bodyForm.$pristine || bodyForm.$invalid" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Save </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

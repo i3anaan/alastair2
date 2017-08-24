@@ -126,6 +126,15 @@
           }
         }
       })
+      .state('app.alastair_chef.my_recipes', {
+        url: '/my_recipes',
+        data: { pageTitle: 'Alastair My Recipes' },
+        views: {
+          'pageContent@app': {
+            templateUrl: `${baseUrl}static/chef_view/my_recipes.html`,
+            controller: 'MyRecipesController as vm'
+          }
+        }      })
       .state('app.alastair_chef.single_recipe', {
         url: '/recipes/:id',
         data: { pageTitle: 'Alastair Single Recipe' },
@@ -154,8 +163,7 @@
       superuser: true
     };
 
-    vm.pageSize = 20;
-    vm.raceCounter = 0;
+
     vm.measurements = [];
 
 
@@ -232,31 +240,241 @@
 
     infiniteScroll($http, vm, apiUrl + 'recipes');
     loadMeasurements($http, vm);
-  };
+  }
 
-  function SingleRecipeController($http, $stateParams) {
+  function SingleRecipeController($scope, $http, $stateParams, $state, $rootScope) {
     var vm = this;
 
-    // Either call the modal to create a new recipe or show what is there
-    if($stateParams.create) {
-      vm.newRecipe();
-    } else {
+    vm.permissions = {
+      edit_recipe: true,
+      delete_recipe: true
+    }
+
+    vm.review = {
+      rating: 1,
+      review: null
+    }
+
+    vm.create = $stateParams.create || $stateParams.id == 'new';
+
+    vm.loadRecipe = function(id) {
       $http({
         url: apiUrl + '/recipes/' + $stateParams.id,
         method: 'GET'
       }).then(function(response) {
         vm.recipe = response.data.data;
-        console.log(response.data.data);
+        // Check if we already reviewed this recipe
+        vm.our_review = vm.recipe.reviews.find((item) => {return item.user_id == $rootScope.currentUser.id});
       }).catch(function(error) {
         showError(error);
       });
     }
 
     vm.newRecipe = function() {
-
+      $('#recipeModal').modal('show');
+      if(!vm.edited_recipe)
+        vm.edited_recipe = {};
     }
 
-  };
+    vm.editRecipe = function() {
+      $('#recipeModal').modal('show');
+      vm.edited_recipe = angular.copy(vm.recipe);
+    }
+
+    vm.submitForm = function() {
+      // If it has an id POST, otherwise PUT
+      if(vm.edited_recipe.id) {
+        $http({
+          url: apiUrl + '/recipes/' + vm.edited_recipe.id,
+          method: 'PUT',
+          data: {
+            recipe: vm.edited_recipe
+          }
+        }).then(function(response) {
+          vm.recipe = response.data.data;
+          showSuccess('Recipe saved successfully');
+          $('#recipeModal').modal('hide');
+        }).catch(function(error) {
+          if(error.status == 422)
+            vm.errors = error.data.errors;
+          else
+            showError(error);
+        });
+      } else {
+        $http({
+          url: apiUrl + '/recipes/',
+          method: 'POST',
+          data: {
+            recipe: vm.edited_recipe
+          }
+        }).then(function(response) {
+          $('#recipeModal').modal('hide');
+          $state.go('app.alastair_chef.single_recipe', {id: response.data.data.id, create: false});
+          showSuccess('Recipe saved successfully');          
+        }).catch(function(error) {
+          if(error.status == 422)
+            vm.errors = error.data.errors;
+          else
+            showError(error);
+        });
+      }
+    }
+
+    vm.deleteRecipe = function() {
+      $http({
+        url: apiUrl + '/recipes/' + $stateParams.id,
+        method: 'DELETE'
+      }).then(function(response) {
+        $state.go('app.alastair_chef.my_recipes');
+        showSuccess('Recipe deleted successfully');          
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
+    vm.publishRecipe = function() {
+      vm.edited_recipe = angular.copy(vm.recipe);
+      vm.edited_recipe.published = true;
+      vm.submitForm();
+    }
+
+    vm.addToMeal = function() {
+      $.gritter.add({
+        title: 'Not yet implemented',
+        text: 'Go beat up the developers for being lazy',
+        sticky: false,
+        time: 8000,
+        class_name: 'my-sticky-class',
+      });
+    }
+
+    vm.addIngredient = function(ingredient) {
+      vm.edited_recipe.recipes_ingredients.push({
+        quantity: 0,
+        ingredient_id: ingredient.originalObject.id,
+        ingredient: ingredient.originalObject
+      });
+      $scope.$broadcast('angucomplete-alt:clearInput', 'ingredientAutocomplete');
+    }
+
+    vm.fetchIngredients = function(query, timeout) {
+      // Copied from the angular tutorial on how to add transformations
+      function appendTransform(defaults, transform) {
+        // We can't guarantee that the default transformation is an array
+        defaults = angular.isArray(defaults) ? defaults : [defaults];
+
+        // Append the new transformation to the defaults
+        return defaults.concat(transform);
+      }
+
+      return $http({
+        url: apiUrl + '/ingredients',
+        method: 'GET',
+        params: {
+          limit: 8,
+          query: query
+        },
+        transformResponse: appendTransform($http.defaults.transformResponse, function (res) {
+          if(res && res.data)
+            return res.data;
+          else
+            return [];
+        }),
+        timeout: timeout,
+      });
+    }
+
+    vm.sendReview = function() {
+      $http({
+        url: apiUrl + `recipes/${$stateParams.id}/reviews`,
+        method: 'POST',
+        data: {
+          review: vm.review
+        }
+      }).then(function(response) {
+        vm.loadRecipe();
+        showSuccess("Review created successfully");
+      }).catch(function(error) {
+        showError(error);
+      })
+    }
+
+    vm.deleteReview = function() {
+      $http({
+        url: apiUrl + `recipes/${$stateParams.id}/reviews/${vm.our_review.id}`,
+        method: 'DELETE'
+      }).then(function(response) {
+        vm.loadRecipe();
+        showSuccess("Review retracted successfully");
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
+    // Either call the modal to create a new recipe or show what is there
+    if(vm.create) {
+      vm.newRecipe();
+    } else {
+      vm.loadRecipe();
+    }
+  }
+
+  function MyRecipesController($http) {
+    var vm = this;
+
+    infiniteScroll($http, vm, apiUrl + 'my_recipes');
+    loadMeasurements($http, vm);
+  }
+
+  function SimpleUserDirective($http) {
+
+    function link(scope, elements, attrs) {
+      scope.message = "Fetching user";
+      attrs.$observe('userid', function(value) {
+        $http({
+          url: '/api/users/' + value,
+          method: 'GET'
+        }).then(function(response) {
+          scope.fetched_user=response.data.data;
+          scope.message = "";
+        }).catch(function(error) {
+          scope.message="Could not fetch"
+        });
+      })
+    }
+
+    return {
+      templateUrl: baseUrl + 'static/chef_view/simple_user_directive.html',
+      restrict: 'E',
+      scope: {
+        userid: '@'
+      },
+      link: link,
+    };
+  }
+
+  function StarRatingDirective() {
+    function link(scope) {
+      scope.range = function(items) {
+        if(items >= 0.5){
+          items = Math.round(items);
+          return new Array(items);
+        }
+        else
+          return [];
+      }
+    }
+
+    return {
+      templateUrl: baseUrl + 'static/chef_view/star_rating_directive.html',
+      restrict: 'E',
+      scope: {
+        score: '=',
+        max: '=',
+      },
+      link: link
+    }
+  }
 
   angular
     .module('app.alastair_chef', [])
@@ -264,6 +482,9 @@
     .controller('WelcomeController', WelcomeController)
     .controller('IngredientController', IngredientController)
     .controller('RecipeController', RecipeController)
-    .controller('SingleRecipeController', SingleRecipeController);
+    .controller('SingleRecipeController', SingleRecipeController)
+    .controller('MyRecipesController', MyRecipesController)
+    .directive('omsSimpleUser', SimpleUserDirective)
+    .directive('omsStarRating', StarRatingDirective);
 })();
 

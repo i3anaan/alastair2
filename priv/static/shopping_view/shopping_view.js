@@ -100,6 +100,16 @@
             controller: 'ShopsController as vm',
           },
         },
+      })
+      .state('app.alastair_shopping.items', {
+        url: '/shops/:id',
+        data: { pageTitle: 'Alastair Shopping Items' },
+        views: {
+          'pageContent@app': {
+            templateUrl: `${baseUrl}static/shopping_view/items.html`,
+            controller: 'ItemsController as vm',
+          },
+        }
       });
   }
 
@@ -191,10 +201,41 @@
     infiniteScroll($http, vm, apiUrl + 'shops');
   }
 
+  function ItemsController($http, $stateParams) {
+    var vm = this;
+
+    vm.loadShop = function() {
+      $http({
+        url: apiUrl + 'shops/' + $stateParams.id,
+        method: 'GET'
+      }).then(function(response) {
+        vm.shop = response.data.data;
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
+    vm.deleteItem = function(item) {
+      $http({
+        url: apiUrl + 'shops/' + $stateParams.id + '/shopping_items/' + item.id,
+        method: 'DELETE'
+      }).then(function(response) {
+        vm.resetData();
+        showSuccess("Shopping item deleted");
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
+    vm.loadShop();
+    infiniteScroll($http, vm, apiUrl + 'shops/' + $stateParams.id + '/shopping_items');
+  }
+
   angular
     .module('app.alastair_shopping', [])
     .config(config)
     .controller('WelcomeController', WelcomeController)
-    .controller('ShopsController', ShopsController);
+    .controller('ShopsController', ShopsController)
+    .controller('ItemsController', ItemsController);
 })();
 

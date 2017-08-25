@@ -21,13 +21,18 @@ x Mismatching measurements shopping_item/ingredient - idea: shopping_item - ingr
 o Alternative measurements in recipe
 o Forward errors in recipes_ingredients and meals_recipes
 o Searching in multiple fields
+o Request to check if ingredient was already matched in the store
+o Shopping list unmatched ingredients
 
 Frontend
 x Serve static files on /static (I think it does that already)
 x Ingredient view
 x Chef welcome view
 x Recipe view
-o Single Recipe view
-o My recipe view
-o Stars directive
-o Simple user directive
+x Single Recipe view
+x My recipe view
+x Stars directive
+x Simple user directive
+x Shop view
+x Shopping items view
+o Matching view

@@ -1,10 +1,18 @@
 defmodule Alastair.ShoppingItemController do
   use Alastair.Web, :controller
+  import Alastair.Helper
 
   alias Alastair.ShoppingItem
 
-  def index(conn, %{"shop_id" => shop_id}) do
-    shopping_items = from(p in ShoppingItem, where: p.shop_id == ^shop_id) |> Repo.all
+  def index(conn, params) do
+    shop_id = params["shop_id"];
+    shopping_items = from(p in ShoppingItem,
+      where: p.shop_id == ^shop_id,
+      preload: [{:mapped_ingredient, [:default_measurement]}],
+      order_by: :name)
+    |> paginate(params)
+    |> search(params)
+    |> Repo.all
     render(conn, "index.json", shopping_items: shopping_items)
   end
 

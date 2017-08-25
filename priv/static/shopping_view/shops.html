@@ -23,12 +23,12 @@
       </thead>
       <tbody>
         <tr ng-repeat="shop in vm.data">
-          <td><a ui-sref="app.alastair_shop.items({id: shop.id})">{{ shop.name }}</a></td>
+          <td><a ui-sref="app.alastair_shopping.items({id: shop.id})">{{ shop.name }}</a></td>
           <td>{{ shop.location }}</td>
           <td>{{ shop.currency.name }}</td>
           <td>
             <button type="button" class="btn btn-sm btn-primary" ng-click="vm.editShop(shop)"><i class="fa fa-pencil"></i></button>
-            <a ui-sref="app.alastair_shop.items({id: shop.id})" class="btn btn-sm btn-info"><i class="fa fa-list"></i></a>
+            <a ui-sref="app.alastair_shopping.items({id: shop.id})" class="btn btn-sm btn-info"><i class="fa fa-list"></i></a>
             <button type="button" class="btn btn-sm btn-danger" ng-click="vm.deleteShop(shop)"><i class="fa fa-minus"></i></button>
           </td>
         </tr>

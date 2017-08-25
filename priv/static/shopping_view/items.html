@@ -1,0 +1,50 @@
+<div class="row">
+  <div class="col-lg-6">
+    <div class="input-group">
+      <span class="input-group-addon"><i class="fa fa-search"></i></span>
+      <input class="form-control" type="text" ng-model="vm.search" ng-change="vm.resetData()" placeholder="Search items">
+    </div>
+  </div>
+  <div class="col-lg-6" >
+    <a ui-sref="app.alastair_shopping.matching({id: vm.shop.id})" class="btn btn-success"><i class="fa fa-arrow-right"></i><i class="fa fa-arrow-left"></i>&nbsp;Matching mode</a>
+  </div>
+</div>
+
+<div class="row" infinite-scroll="vm.loadNextPage()" infinite-scroll-disabled="vm.block_infinite_scroll" infinite-scroll-distance="1">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Price</th>
+          <th>Buying quantity</th>
+          <th>Mapped ingredient</th>
+          <th>Comment</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="item in vm.data">
+          <td>{{ item.name }}</td>
+          <td>{{ item.price }}{{ vm.shop.currency.display_code }}</td>
+          <td>
+            <span ng-show="!item.flexible_amount">{{ item.buying_quantity }}{{ item.mapped_ingredient.default_measurement.display_code }}</span>
+            <span ng-show="item.flexible_amount">Flexible</span>
+          </td>
+          <td>{{ item.mapped_ingredient.name }}</td>
+          <td><i><small>{{ item.comment }}</small></i></td>
+          <td>
+            <button type="button" class="btn btn-sm btn-danger" ng-click="vm.deleteItem(item)"><i class="fa fa-minus"></i></button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div ng-show="vm.data.length === 0 && !vm.busy">
+    <p>No shops in database with the current search</p>
+  </div>
+  <div ng-show="vm.busy">
+    <p>Searching...</p>
+  </div>
+</div>

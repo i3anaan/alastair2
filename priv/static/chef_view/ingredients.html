@@ -29,8 +29,8 @@
 					<td>{{ ingredient.description }}</td>
 					<td>{{ ingredient.default_measurement.name }}</td>
           <td ng-if="vm.permissions.superuser">
-            <button type="button" class="btn btn-sm" ng-click="vm.editIngredient(ingredient)"><i class="fa fa-pencil"></i></button>
-            <button type="button" class="btn btn-sm" ng-click="vm.deleteIngredient(ingredient)"><i class="fa fa-minus"></i></button>
+            <button type="button" class="btn btn-sm btn-warning" ng-click="vm.editIngredient(ingredient)"><i class="fa fa-pencil"></i></button>
+            <button type="button" class="btn btn-sm btn-danger" ng-click="vm.deleteIngredient(ingredient)"><i class="fa fa-minus"></i></button>
           </td>
 				</tr>
 			</tbody>

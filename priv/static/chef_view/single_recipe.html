@@ -26,7 +26,7 @@
   </div>
 
   <div>
-    <button type="button" class="btn btn-info" ng-click="vm.editRecipe()" ng-show="vm.permissions.edit_recipe"><i class="fa fa-pencil"></i>&nbsp;Edit</button>
+    <button type="button" class="btn btn-warning" ng-click="vm.editRecipe()" ng-show="vm.permissions.edit_recipe"><i class="fa fa-pencil"></i>&nbsp;Edit</button>
     <button type="button" class="btn btn-success" ng-click="vm.publishRecipe()" ng-show="vm.permissions.edit_recipe && !vm.recipe.published"><i class="fa fa-share"></i>&nbsp;Publish</button>
     <button type="button" class="btn btn-success" ng-click="vm.addToMeal()" ng-show="vm.recipe.published"><i class="fa fa-bars"></i>&nbsp;Add to Meal</button>
     <button type="button" class="btn btn-danger" ng-click="vm.deleteRecipe()" ng-show="vm.permissions.delete_recipe"><i class="fa fa-minus"></i>&nbsp;Delete</button>

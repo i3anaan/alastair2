@@ -20,7 +20,7 @@ defmodule Alastair.Seeds.ExampleSeed do
 			default_measurement: g
 		})
 
-		oil = Alastair.Repo.insert!(%Alastair.Ingredient{
+		Alastair.Repo.insert!(%Alastair.Ingredient{
 			name: "Olive Oil",
 			description: "",
 			default_measurement: ml
@@ -74,7 +74,7 @@ defmodule Alastair.Seeds.ExampleSeed do
 			description: "A simple pasta recipe",
 			person_count: 4,
 			instructions: "Chop and fry vegetables, add water and boil pasta",
-			created_by: "asd123",
+			created_by: "3",
 			published: true
 		})
 
@@ -152,7 +152,7 @@ defmodule Alastair.Seeds.ExampleSeed do
 			shop: shop1
 		})
 
-		Alastair.Repo.insert!(%Alastair.ShoppingItem{
+		fresh_tomatoes = Alastair.Repo.insert!(%Alastair.ShoppingItem{
 			name: "Frische Tomaten",
 			buying_quantity: 1000.0,
 			flexible_amount: true,
@@ -191,6 +191,13 @@ defmodule Alastair.Seeds.ExampleSeed do
 		Alastair.Repo.insert!(%Alastair.Event{
 			id: "DevelopYourself3",
 			shop: shop1
+		})
+
+		Alastair.Repo.insert!(%Alastair.ShoppingListNote{
+			ticked: true,
+			event_id: "DevelopYourself3",
+			ingredient: tomatoes,
+			shopping_item: fresh_tomatoes
 		})
 	end
 end

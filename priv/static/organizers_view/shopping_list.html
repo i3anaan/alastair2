@@ -1,0 +1,130 @@
+<h1 class="page-header">Shopping list for {{ vm.event.id }} </h1>
+
+<button type="button" class="btn btn-primary" ng-click="detailed_view = !detailed_view"><span ng-show="detailed_view">Simple View</span><span ng-show="!detailed_view">Detailed View</span></button>
+<button type="button" class="btn btn-warning" ng-show="vm.unmapped && vm.unmapped.length>0" ng-click="vm.showUnmapped()"><i class="fa fa-exclamation-triangle"></i> Not all ingredients are available in the store!</button>
+
+
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Chosen item</th>
+        <th>Needed Quantity</th>
+        <th>Buying amount</th>
+        <th>Price</th>
+        <th>Ingredient</th>
+
+        <th ng-show="detailed_view">Item Comments</th>
+        <th ng-show="detailed_view">Ingredient Description</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="ingredient in vm.data">
+        <td>
+          <input type="checkbox" ng-change="vm.checkboxTicked(ingredient)" ng-model="ingredient.note.ticked">
+          <i class="fa fa-hourglass-start" ng-show="ingredient.note_loading"></i>
+          {{ ingredient.chosen_item.shopping_item.name }} 
+          <button type="button" class="btn btn-link" ng-show="detailed_view && ingredient.items.length > 1" ng-click="vm.showAlternatives(ingredient)">Show alternatives</button>
+        </td>
+
+        <td>{{ ingredient.calculated_quantity }}{{ ingredient.ingredient.default_measurement.display_code }}</td>
+        <td>{{ ingredient.chosen_item.item_buying_quantity  }}{{ ingredient.ingredient.default_measurement.display_code }} ({{ ingredient.chosen_item.item_count }} items)
+        <td>{{ ingredient.best_price | number:2 }}{{ vm.event.shop.currency.display_code }}</td>
+        <td>{{ ingredient.ingredient.name }}</td>
+        <td ng-show="detailed_view"><i><small>{{ ingredient.chosen_item.item.comment }}</small></i></td>
+        <td ng-show="detailed_view">{{ ingredient.ingredient.description}}</td>
+      </tr>
+      <tr>
+        <td><b>Total: {{ vm.accumulates.count }} items</b></td>
+        <td></td>
+        <td></td>
+        <td><b>{{ vm.accumulates.price | number:2 }}{{ vm.event.shop.currency.display_code }}<b></td>
+        <td></td>
+        <td ng-show="detailed_view" colspan="2"></td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+
+<!-- ########################### Unmapped Ingredient modal ###################### -->
+<div class="modal fade" id="unmappedModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title"><i class="fa fa-exclamation-triangle"></i>Unavailable ingredients!</h4>
+            </div>
+            <p class="alert alert-warning">
+              Not all ingredients are available to buy in this supermarket, so the price calculation is inaccurate. You might want to switch to another shop which has all the ingredients or map missing ingredients in this shop
+            </p>
+            <h3>Missing</h3>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Ingredient</th>
+                    <th>Needed Quantity</th>
+                    <th>Ingredient Description</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="ingredient in vm.unmapped">
+                    <td>{{ ingredient.ingredient.name }}</td>
+                    <td>{{ ingredient.calculated_quantity }}{{ ingredient.ingredient.default_measurement.display_code }}</td>
+                    <td>{{ ingredient.ingredient.description}}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ########################### Alternative items modal ###################### -->
+<div class="modal fade" id="altItemsModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Alternative items for {{vm.alt_ingredient.ingredient.name}}</h4>
+            </div>
+            <h6>Needed: {{ vm.alt_ingredient.calculated_quantity }}{{ vm.alt_ingredient.ingredient.default_measurement.display_code }}</td>
+
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Alternative item</th>
+                    <th>Buying amount</th>
+                    <th>Price</th>
+                    <th></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="item in vm.alt_ingredient.items">
+                    <td>
+                      {{ item.shopping_item.name }} 
+                    </td>
+                    <td>{{ item.item_buying_quantity  }}{{ vm.alt_ingredient.ingredient.default_measurement.display_code }} ({{ item.item_count }} items)
+                    <td>{{ item.item_price | number:2 }}{{ vm.event.shop.currency.display_code }}</td>
+                    <td>
+                      <button type="button" class="btn btn-sm btn-primary" ng-click="vm.chooseAltItem(item)"><i class="fa fa-check-circle"></i> Choose</button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
+            </div>
+        </div>
+    </div>
+</div>

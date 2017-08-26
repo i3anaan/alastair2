@@ -22,10 +22,11 @@ o Alternative measurements in recipe
 o Forward errors in recipes_ingredients and meals_recipes
 o Searching in multiple fields
 o Request to check if ingredient was already matched in the store
-o Shopping list unmatched ingredients
+x Shopping list unmatched ingredients
+x Shopping list ticked items and chosen mappings
 
 Frontend
-x Serve static files on /static (I think it does that already)
+x Serve static files on /static
 x Ingredient view
 x Chef welcome view
 x Recipe view
@@ -35,4 +36,7 @@ x Stars directive
 x Simple user directive
 x Shop view
 x Shopping items view
-o Matching view
+x Matching view
+o Meals
+x Shopping list
+o Shopping list date sliders

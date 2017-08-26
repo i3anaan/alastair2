@@ -1,0 +1,81 @@
+<!-- TODO should be included in core -->
+<link rel="stylesheet" href="https://ghiden.github.io/angucomplete-alt/css/angucomplete-alt.css">
+
+<h1 class="page-header">Matching for {{ vm.shop.name }}
+  <small ng-show="vm.shopping_item.mapped_ingredient"> - matching {{ vm.shopping_item.mapped_ingredient.name }}</small>
+</h1>
+
+<form name="matchingForm" ng-submit="vm.submitForm()">
+
+  <div class="form-group m-b-20">
+    <label>Ingredient*</label>
+    <angucomplete-alt 
+      id="ingredientAutocomplete"
+      placeholder="Search ingredients"
+      pause="50"
+      selected-object="vm.applyIngredient"
+      remote-api-handler="vm.fetchIngredients"
+      title-field="name"
+      description-field="description"
+      minlength="1"
+      input-class="form-control form-control-small">
+    </angucomplete-alt>
+    <p class="label label-danger" ng-show="vm.errors.mapped_ingredient_id">{{ vm.errors.mapped_ingredient_id }}</p>
+    <p class="alert alert-info" ng-show="vm.show_help">Your shopping item needs to map to an ingredient, so when you use a recipe later it can be considered as a buying alternative in the shopping list</p>
+  </div>
+
+
+  <div class="form-group m-b-20">
+      <label>Name*</label>
+      <input type="text" class="form-control" ng-model="vm.shopping_item.name" required />
+      <p class="label label-danger" ng-show="vm.errors.name">{{ vm.errors.name }}</p>
+      <p class="alert alert-info" ng-show="vm.show_help">Write here what is written on the packaging so you find it easily when checking the shopping list</p>
+  </div>
+
+  <div class="form-group m-b-20">
+    <label>Price*</label>
+    <div class="input-group">
+      <input type="number" step="0.01" class="form-control" ng-model="vm.shopping_item.price" required />
+      <span class="input-group-addon">{{ vm.shop.currency.display_code }}</span>
+    </div>
+    <p class="label label-danger" ng-show="vm.errors.price">{{ vm.errors.price }}</p>
+    <p class="alert alert-info" ng-show="vm.show_help">The price goes per one buying quantity, just copy it from the sign</p>
+
+  </div>
+
+  <div class="form-group m-b-20">
+    <label ng-show="!vm.shopping_item.flexible_amount">Buying quantity*</label>
+    <label ng-show="vm.shopping_item.flexible_amount">Price is per*</label>
+    <span ng-show="!vm.shopping_item.mapped_ingredient">Please match an ingredient first!</span>
+    <div ng-show="vm.shopping_item.mapped_ingredient">
+      <div class="input-group">
+        <input type="number" step="0.01" class="form-control" ng-model="vm.shopping_item.buying_quantity" />
+        <span class="input-group-addon">{{ vm.shopping_item.mapped_ingredient.default_measurement.display_code }}</span>
+      </div>
+      <div class="checkbox">
+        <label>
+          <input type="checkbox" ng-model="vm.shopping_item.flexible_amount">
+          flexible amount
+        </label>
+      </div>
+    </div>
+    <p class="label label-danger" ng-show="vm.errors.buying_quantity">{{ vm.errors.buying_quantity }}</p>
+    <p class="label label-danger" ng-show="vm.errors.flexible_amount">{{ vm.errors.flexible_amount }}</p>
+    <p class="alert alert-info" ng-show="vm.show_help">Alastair has to know per how much the price is calculated. Choose the smallest buyable unit here or if you can serve yourself as much as you want, tick the flexible amount checkbox. Still remember to put the price and quantity as it's written on the sign.<br>You have to choose a ingredient for this first because the buying quantity unit is determined by the ingredient (gram, liter, pieces)</p>
+  </div>
+
+  <div class="form-group m-b-20">
+      <label>Comment</label>
+      <input type="text" class="form-control" ng-model="vm.shopping_item.comment" />
+      <p class="label label-danger" ng-show="vm.errors.comment">{{ vm.errors.comment }}</p>
+      <p class="alert alert-info" ng-show="vm.show_help">Note shopping alternatives, tips where to find it or other things you should bear in mind about the item</p>
+  </div>
+
+  <div class="form-group">
+    <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save Matching</button>
+    <a ui-sref="app.alastair_shopping.items({id: vm.shop.id})" class="btn btn-warning"><i class="fa fa-arrow-left"></i> Back to list</a>
+    <button type="button" class="btn btn-info" ng-click="vm.show_help = !vm.show_help"><i class="fa fa-question"></i> Help</button>
+    <p class="alert alert-info" ng-show="vm.show_help">Hopefully that was helpful, if you want to disable the help press the help button again</p>
+  </div>
+
+</form>

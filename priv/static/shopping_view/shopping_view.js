@@ -110,6 +110,16 @@
             controller: 'ItemsController as vm',
           },
         }
+      })
+      .state('app.alastair_shopping.matching', {
+        url: '/shops/:id/matching',
+        data: { pageTitle: 'Alastair Matching View' },
+        views: {
+          'pageContent@app': {
+            templateUrl: `${baseUrl}static/shopping_view/matching.html`,
+            controller: 'MatchingController as vm',
+          },
+        }
       });
   }
 
@@ -231,11 +241,88 @@
     infiniteScroll($http, vm, apiUrl + 'shops/' + $stateParams.id + '/shopping_items');
   }
 
+  function MatchingController($http, $stateParams, $scope) {
+    var vm = this;
+
+    vm.reset = function() {
+      vm.shopping_item = {};
+      $scope.$broadcast('angucomplete-alt:clearInput', 'ingredientAutocomplete');
+      vm.show_help=false;
+    }
+
+    vm.loadShop = function() {
+      $http({
+        url: apiUrl + 'shops/' + $stateParams.id,
+        method: 'GET'
+      }).then(function(response) {
+        vm.shop = response.data.data;
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
+    vm.applyIngredient = function(selected) {
+      if(selected) {
+        vm.shopping_item.mapped_ingredient = selected.originalObject;
+        vm.shopping_item.mapped_ingredient_id = selected.originalObject.id;
+      }
+    }
+
+    vm.fetchIngredients = function(query, timeout) {
+      // Copied from the angular tutorial on how to add transformations
+      function appendTransform(defaults, transform) {
+        // We can't guarantee that the default transformation is an array
+        defaults = angular.isArray(defaults) ? defaults : [defaults];
+
+        // Append the new transformation to the defaults
+        return defaults.concat(transform);
+      }
+
+      return $http({
+        url: apiUrl + '/ingredients',
+        method: 'GET',
+        params: {
+          limit: 8,
+          query: query
+        },
+        transformResponse: appendTransform($http.defaults.transformResponse, function (res) {
+          if(res && res.data)
+            return res.data;
+          else
+            return [];
+        }),
+        timeout: timeout,
+      });
+    }
+
+    vm.submitForm = function() {
+      $http({
+        url: apiUrl + '/shops/' + $stateParams.id + '/shopping_items',
+        method: 'POST',
+        data: {
+          shopping_item: vm.shopping_item
+        }
+      }).then(function(response) {
+        showSuccess("Shopping item saved, you can continue matching!");
+        vm.reset();
+      }).catch(function(error) {
+        if(error.status == 422) 
+          vm.errors = error.data.errors;
+        else
+          showError(error);
+      });
+    }
+
+    vm.reset();
+    vm.loadShop();
+  }
+
   angular
     .module('app.alastair_shopping', [])
     .config(config)
     .controller('WelcomeController', WelcomeController)
     .controller('ShopsController', ShopsController)
-    .controller('ItemsController', ItemsController);
+    .controller('ItemsController', ItemsController)
+    .controller('MatchingController', MatchingController);
 })();
 

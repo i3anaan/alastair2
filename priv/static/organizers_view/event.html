@@ -1,0 +1,28 @@
+<!-- TODO should be included in core -->
+<link rel="stylesheet" href="https://ghiden.github.io/angucomplete-alt/css/angucomplete-alt.css">
+
+
+<h1 class="page-header">Event view - {{ vm.event.id }}</h1>
+
+<div ng-show="vm.event.shop">
+  <h5>Assigned shop: <a ui-sref="app.alastair_shopping.items({id: vm.event.shop.id})">{{ vm.event.shop.name }}</a> ({{ vm.event.shop.location }}, currency {{ vm.event.shop.currency.name }})</h5>
+  <button type="button" ng-click="vm.event.shop=null;" class="btn btn-warning"><i class="fa fa-pencil"></i>Change shop</button>
+  <a ui-sref="app.alastair_organizer.shopping_list({id: vm.event.id})" class="btn btn-primary"><i class="fa fa-shopping-cart"></i> Shopping list</a>
+</div>
+
+<div ng-show="!vm.event.shop" class="form-group">
+  <label>Find a shop</label>
+  <angucomplete-alt 
+      id="shopAutocomplete"
+      placeholder="Search shops"
+      pause="50"
+      selected-object="tmpShop"
+      remote-api-handler="vm.fetchShops"
+      title-field="name"
+      description-field="location"
+      minlength="1"
+      input-class="form-control form-control-small">
+    </angucomplete-alt>
+    <button type="button" class="btn btn-primary" ng-click="vm.applyShop(tmpShop.originalObject)"><i class="fa fa-save"></i> Apply shop</button>
+    <button type="button" class="btn btn-danger" ng-click="vm.applyShop()"><i class="fa fa-save"></i> Save without shop</button>
+</div>

@@ -20,9 +20,10 @@ defmodule Alastair.Router do
     scope "/events/:event_id", as: :event do
       resources "/meals", MealController, except: [:new, :edit]
       get "/shopping_list", ShoppingListController, :shopping_list
+      put "/shopping_list/note/:ingredient_id", ShoppingListController, :put_note
     end
 
-    resources "/events", EventController, only: [:show, :update]
+    resources "/events", EventController, only: [:index, :show, :update]
 
     resources "/recipes", RecipeController, except: [:new, :edit] do
       resources "/reviews", ReviewController, except: [:new, :edit]

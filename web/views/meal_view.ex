@@ -13,6 +13,7 @@ defmodule Alastair.MealView do
   def render("meal.json", %{meal: meal}) do
     %{id: meal.id,
       name: meal.name,
+      date: meal.date,
       time: meal.time,
       meals_recipes: render_assoc_many(meal.meals_recipes, Alastair.MealView, "meal_recipe.json")  
       }

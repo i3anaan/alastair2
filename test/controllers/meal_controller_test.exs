@@ -3,8 +3,9 @@ defmodule Alastair.MealControllerTest do
 
   alias Alastair.Meal
   @event "DevelopYourself3"
-  @meal_time Ecto.DateTime.cast!(%{day: 17, hour: 14, min: 0, month: 4, sec: 0, year: 2010})
-  @valid_attrs %{name: "some content", time: %{day: 18, hour: 14, min: 0, month: 4, sec: 0, year: 2010}}
+  @meal_time Ecto.Time.cast!(%{hour: 14, min: 0, sec: 0})
+  @meal_date Ecto.Date.cast!(%{year: 2010, month: 01, day: 22})
+  @valid_attrs %{name: "some content", time: %{hour: 14, min: 0, sec: 0}, date: %{year: 2010, month: 01, day: 22}}
   @invalid_attrs %{}
 
   setup %{conn: conn} do
@@ -19,13 +20,13 @@ defmodule Alastair.MealControllerTest do
 
   test "shows chosen resource", %{conn: conn} do
     recipe = Repo.insert! %Alastair.Recipe{description: "some content", instructions: "some content", name: "some content", person_count: 42}
-    meal = Repo.insert! %Meal{name: "some content", time: @meal_time, event_id: @event}
+    meal = Repo.insert! %Meal{name: "some content", time: @meal_time, date: @meal_date, event_id: @event}
     meal_recipe = Repo.insert! %Alastair.MealRecipe{person_count: 10, meal: meal, recipe: recipe}
 
     conn = get conn, event_meal_path(conn, :show, @event, meal)
     assert json_response(conn, 200)["data"] |> map_inclusion(%{"id" => meal.id,
       "name" => meal.name})
-    assert json_response(conn, 200)["data"]["time"] |> Ecto.DateTime.cast! == @meal_time
+    assert json_response(conn, 200)["data"]["time"] |> Ecto.Time.cast! == @meal_time
     assert json_response(conn, 200)["data"]["meals_recipes"] |> is_list
     assert json_response(conn, 200)["data"]["meals_recipes"] |> Enum.any?(fn(mr) -> mr["recipe_id"] == meal_recipe.recipe_id end)
   end
@@ -65,7 +66,7 @@ defmodule Alastair.MealControllerTest do
   end
 
   test "updates and renders chosen resource when data is valid", %{conn: conn} do
-    meal = Repo.insert! %Meal{name: "some other content", time: @meal_time, event_id: @event}
+    meal = Repo.insert! %Meal{name: "some other content", time: @meal_time, date: @meal_date, event_id: @event}
     conn = put conn, event_meal_path(conn, :update, @event, meal), meal: @valid_attrs
     assert json_response(conn, 200)["data"]["id"]
     assert Repo.get_by(Meal, %{name: "some content", event_id: @event})
@@ -73,7 +74,7 @@ defmodule Alastair.MealControllerTest do
 
   test "updates and renders chosen resource when data is valid and recipes are attached", %{conn: conn} do
     recipe = Repo.insert! %Alastair.Recipe{description: "some content", instructions: "some content", name: "some content", person_count: 42}
-    meal = Repo.insert! %Meal{name: "some other content", time: @meal_time, event_id: @event}
+    meal = Repo.insert! %Meal{name: "some other content", time: @meal_time, date: @meal_date, event_id: @event}
     Repo.insert! %Alastair.MealRecipe{person_count: 10, meal: meal, recipe: recipe}
 
     conn = put conn, event_meal_path(conn, :update, @event, meal), meal: Map.put(@valid_attrs, :meals_recipes, [%{person_count: 20, recipe_id: recipe.id}])
@@ -85,7 +86,7 @@ defmodule Alastair.MealControllerTest do
 
   test "updates and renders chosen resource when data is valid and empty list of recipes is attached", %{conn: conn} do
     recipe = Repo.insert! %Alastair.Recipe{description: "some content", instructions: "some content", name: "some content", person_count: 42}
-    meal = Repo.insert! %Meal{name: "some other content", time: @meal_time, event_id: @event}
+    meal = Repo.insert! %Meal{name: "some other content", time: @meal_time, date: @meal_date, event_id: @event}
     Repo.insert! %Alastair.MealRecipe{person_count: 10, meal: meal, recipe: recipe}
 
     conn = put conn, event_meal_path(conn, :update, @event, meal), meal: Map.put(@valid_attrs, :meals_recipes, [])
@@ -101,7 +102,7 @@ defmodule Alastair.MealControllerTest do
 #  end
 
   test "deletes chosen resource", %{conn: conn} do
-    meal = Repo.insert! %Meal{name: "some other content", time: @meal_time, event_id: @event}
+    meal = Repo.insert! %Meal{name: "some other content", time: @meal_time, date: @meal_date, event_id: @event}
     conn = delete conn, event_meal_path(conn, :delete, @event, meal)
     assert response(conn, 204)
     refute Repo.get(Meal, meal.id)

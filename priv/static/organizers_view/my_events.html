@@ -1,0 +1,18 @@
+<p class="alert alert-info">This part of alastair is still in construction. Development is dependant on oms-events to be stable again, however I hope to be able to rework this soon. Until then please don't mind this page being mildly ugly, it will be replaced soon</p>
+
+<h1 class="page-header">My Events</h1>
+<ul>
+  <li ng-repeat="event in vm.events">
+    <a ui-sref="app.alastair_organizer.event({id: event.id})">{{ event.id }}</a>
+  </li>
+</ul>
+<span ng-show="!vm.events || vm.events.length == 0">No events in the database, create one</span>
+
+<hr>
+<h4>Create an event</h4>
+
+<div class="form-group">
+  <label>Event id in oms-events</label>
+  <input class="form-control" ng-model="_id" type="text" placeholder="id">
+  <a ui-sref="app.alastair_organizer.event({id: _id})" class="btn btn-primary">Create new dummy event</a>
+</div>

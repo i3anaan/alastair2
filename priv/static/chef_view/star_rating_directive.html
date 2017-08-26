@@ -1,7 +1,7 @@
 <span ng-repeat="n in range(score) track by $index">
 <i class="fa fa-star"></i>
 </span>
-<span ng-repeat="n in range(max-score) track by $index">
+<span ng-repeat="n in range(max-score-0.00001) track by $index">
 <i class="fa fa-star-o"></i>
 </span>
 ({{score|number:1}})

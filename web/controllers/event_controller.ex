@@ -1,6 +1,5 @@
 defmodule Alastair.EventController do
   use Alastair.Web, :controller
-
   alias Alastair.Event
 
   def get_event(id) do
@@ -16,6 +15,14 @@ defmodule Alastair.EventController do
 
   def get_meals(id) do
     from(p in Alastair.Meal, where: p.event_id == ^id) |> Repo.all
+  end
+
+  # TODO only list own users events
+  def index(conn, params) do
+    events = from(p in Event)
+    |> Repo.all
+    
+    render(conn, "index.json", events: events)
   end
 
   # It is only possible to show an event, if it does not exist in our database we create it right away
@@ -37,6 +44,9 @@ defmodule Alastair.EventController do
     case Repo.update(changeset) do
       {:ok, event} ->
         event = Repo.preload(event, [{:shop, [:currency]}])
+        |> Map.put(:meals, get_meals(id))
+        |> Map.put(:event_editors, get_event_editors(id))
+        
         render(conn, "show.json", event: event)
       {:error, changeset} ->
         conn

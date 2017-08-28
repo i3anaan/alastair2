@@ -1,0 +1,33 @@
+<h1 class="page-header">{{ vm.meal.name }} <small> on {{ vm.meal.date | date:'EEE d.M' }}</small></h1>
+
+<ul>
+  <li ng-repeat="mr in vm.meal.meals_recipes">
+    <a href="#{{ mr.id }}">{{ mr.recipe.name }}</a>
+  </li>
+</ul>
+
+<div ng-repeat="mr in vm.meal.meals_recipes" id="{{ mr.id }}">
+  <hr>
+  <h3>
+    {{ mr.recipe.name }} 
+    <small>for {{ mr.person_count }} persons</small>
+  </h3>
+
+
+  <p class="alert alert-info">{{ mr.recipe.description }}</p>
+
+  <table class="table table-responsive">
+    <tbody>
+      <tr ng-repeat="ri in mr.recipe.recipes_ingredients">
+        <td style="text-align: right;">{{ ri.item_quantity }}&nbsp;{{ ri.ingredient.default_measurement.display_code }}</td>
+        <td>{{ ri.ingredient.name }}</td>
+        <td><small><i>{{ ri.comment | limitTo:100 }}</i></small></td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="note note-info">
+    <h4>Instructions</h4>
+    <p>{{ mr.recipe.instructions }}</p>
+  </div>
+</div>

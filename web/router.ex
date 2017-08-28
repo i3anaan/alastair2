@@ -3,7 +3,7 @@ defmodule Alastair.Router do
 
   def fetch_user(conn, _) do
     user_service = Application.get_env(:alastair, Alastair.Endpoint)[:user_service]
-    apply(Alastair.User, user_service, [conn])
+    apply(Alastair.UserService, user_service, [conn])
   end
 
   pipeline :api do

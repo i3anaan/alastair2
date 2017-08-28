@@ -272,7 +272,7 @@
 
     vm.newRecipe = function() {
       $('#recipeModal').modal('show');
-      if(!vm.edited_recipe)
+      if(!vm.create)
         vm.edited_recipe = {};
     }
 

@@ -1,4 +1,4 @@
-defmodule Alastair.User do
+defmodule Alastair.UserService do
   use Alastair.Web, :controller # To use render
 
   # For tests so they can run without the core being up

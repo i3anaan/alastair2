@@ -12,6 +12,9 @@ defmodule Alastair.EventView do
 
   def render("event.json", %{event: event}) do
     %{id: event.id,
+      name: event.name,
+      starts: event.starts,
+      ends: event.ends,
       shop_id: event.shop_id,
       shop: render_assoc_one(event.shop, Alastair.ShopView, "shop.json"),
       meals: render_assoc_many(event.meals, Alastair.MealView, "meal.json")

@@ -6,7 +6,7 @@ x Recipe reviews
 x Meals
 x Meal per event
 x Currencies
-o Event listing
+x Event listing
 o Event editors, event permissions
 x Event/Shop
 x Shopping list
@@ -37,6 +37,6 @@ x Simple user directive
 x Shop view
 x Shopping items view
 x Matching view
-o Meals
+x Meals
 x Shopping list
 o Shopping list date sliders

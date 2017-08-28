@@ -2,16 +2,16 @@
 <link rel="stylesheet" href="https://ghiden.github.io/angucomplete-alt/css/angucomplete-alt.css">
 
 
-<h1 class="page-header">Event view - {{ vm.event.id }}</h1>
+<h1 class="page-header">Event view - {{ vm.event.name }}</h1>
 
-<div ng-show="vm.event.shop">
+<div ng-show="!vm.change_shop">
   <h5>Assigned shop: <a ui-sref="app.alastair_shopping.items({id: vm.event.shop.id})">{{ vm.event.shop.name }}</a> ({{ vm.event.shop.location }}, currency {{ vm.event.shop.currency.name }})</h5>
-  <button type="button" ng-click="vm.event.shop=null;" class="btn btn-warning"><i class="fa fa-pencil"></i>Change shop</button>
+  <button type="button" ng-click="vm.change_shop=true;" class="btn btn-warning"><i class="fa fa-pencil"></i>Change shop</button>
   <a ui-sref="app.alastair_organizer.shopping_list({id: vm.event.id})" class="btn btn-primary"><i class="fa fa-shopping-cart"></i> Shopping list</a>
 </div>
 
-<div ng-show="!vm.event.shop" class="form-group">
-  <label>Find a shop</label>
+<div ng-show="vm.change_shop" class="form-group">
+  <p class="alert alert-danger">Changing the shop will delete all item choices and checkboxes from the current shopping list</p>
   <angucomplete-alt 
       id="shopAutocomplete"
       placeholder="Search shops"
@@ -24,5 +24,108 @@
       input-class="form-control form-control-small">
     </angucomplete-alt>
     <button type="button" class="btn btn-primary" ng-click="vm.applyShop(tmpShop.originalObject)"><i class="fa fa-save"></i> Apply shop</button>
-    <button type="button" class="btn btn-danger" ng-click="vm.applyShop()"><i class="fa fa-save"></i> Save without shop</button>
+    <button type="button" class="btn btn-danger" ng-click="change_shop=false;"><i class="fa fa-ban"></i> Cancel</button>
+</div>
+<hr>
+<h2>Meals  <button type="button" class="btn btn-primary" ng-click="vm.newMeal()"><i class="fa fa-plus"></i> New</button>
+</h2>
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Date</th>
+        <th>Meal</th>
+        <th>Time</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="meal in vm.meals">
+        <td>{{ meal.date | date:'EEE d.M'}}</td>
+        <td><a ui-sref="app.alastair_organizer.meal({event_id: vm.event.id, meal_id: meal.id})">{{ meal.name }}</a></td>
+        <td>{{ meal.time | date:'hh:mm'}}</td>
+        <td>
+          <a class="btn btn-primary btn-sm" ui-sref="app.alastair_organizer.meal({event_id: vm.event.id, meal_id: meal.id})"><i class="fa fa-list"></i> Show</a>
+          <button type="button" class="btn btn-warning btn-sm" ng-click="vm.editMeal(meal)"><i class="fa fa-pencil"></i> Edit</button>
+          <button type="button" class="btn btn-danger btn-sm" ng-click="vm.deleteMeal(meal)"><i class="fa fa-minus"></i> Delete</button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+
+<!-- ########################### Edit Meal modal ###################### -->
+<div class="modal fade" id="mealModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Meal add/edit</h4>
+            </div>
+            <form name="mealForm" ng-submit="vm.submitForm()" class="margin-bottom-0" novalidate>
+                <div class="modal-body">
+                    <div class="form-group m-b-20">
+                        <label>Name*</label>
+                        <input type="text" class="form-control" ng-model="vm.edited_meal.name" required />
+                        <p class="label label-danger" ng-show="vm.errors.name">{{ vm.errors.name }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                        <label>Date*</label>
+                        <!-- TODO use datepicker -->
+                        <input type="text" class="form-control" ng-model="vm.edited_meal.date" />
+                        <p class="label label-danger" ng-show="vm.errors.date">{{ vm.errors.date }}</p>
+                    </div>
+                    <div class="form-group m-b-20">
+                      <label>Time</label>
+                      <!-- TODO use timepicker -->
+                      <input type="text" class="form-control" ng-model="vm.edited_meal.time" />
+                      <p class="label label-danger" ng-show="vm.errors.time">{{ vm.errors.time }}</p>
+                    </div>
+                    <h2>Recipes</h2>
+                    <div class="row m-b-10 alert" style="background: #ddd;" ng-repeat="mr in vm.edited_meal.meals_recipes">
+                      <div class="row">
+                        <div class="col-md-3">
+                          <div class="input-group">
+                            <input type="number" class="form-control" ng-model="mr.person_count">
+                            <span class="input-group-addon">ppl</span>
+                          </div>
+                        </div>
+                        <div class="col-md-9">
+                          <label style="padding-top: 8px;" >{{ mr.recipe.name }}</label>
+                          <button class="btn btn-sm btn-danger pull-right" ng-click="vm.edited_meal.meals_recipes.splice($index, 1)"><i class="fa fa-minus"></i></button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="row m-b-10 alert" style="background: #ddd;">
+                      <div class="row">
+                        <div class="col-md-3">
+                          <div class="input-group">
+                            <input type="number" class="form-control" disabled placeholder="Add new">
+                          </div>
+                        </div>
+                        <div class="col-md-9">
+                          <angucomplete-alt class="pull-left"
+                            id="recipesAutocomplete"
+                            placeholder="Search recipes"
+                            pause="50"
+                            selected-object="tmpRecipe"
+                            remote-api-handler="vm.fetchRecipes"
+                            title-field="name"
+                            description-field="description"
+                            minlength="1"
+                            input-class="form-control form-control-small">
+                          </angucomplete-alt>
+                          <button type="button" class="btn btn-sm btn-success pull-right" ng-click="vm.addRecipe(tmpRecipe)"><i class="fa fa-plus"></i></button>
+                        </div>
+                      </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
+                    <button type="submit" ng-disabled="bodyForm.$pristine || bodyForm.$invalid" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Save </button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>

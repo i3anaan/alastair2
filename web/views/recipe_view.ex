@@ -28,6 +28,7 @@ defmodule Alastair.RecipeView do
   def render("recipe_ingredient.json", %{recipe: recipe_ingredient}) do
     %{quantity: recipe_ingredient.quantity,
       comment: recipe_ingredient.comment,
+      item_quantity: Map.get(recipe_ingredient, :item_quantity, nil),
       ingredient: render_assoc_one(recipe_ingredient.ingredient, Alastair.IngredientView, "ingredient.json"),
       ingredient_id: recipe_ingredient.ingredient_id
     }

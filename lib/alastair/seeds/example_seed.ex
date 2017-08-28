@@ -116,6 +116,8 @@ defmodule Alastair.Seeds.ExampleSeed do
 		meal1 = Alastair.Repo.insert!(%Alastair.Meal{
 			name: "Dinner",
 			event_id: "DevelopYourself3",
+			date: Ecto.Date.cast!(%{year: 2015, month: 12, day: 10}),
+			time: Ecto.Time.cast!(%{hour: 20, minute: 0, second: 0})
 		})
 
 		Alastair.Repo.insert!(%Alastair.MealRecipe{

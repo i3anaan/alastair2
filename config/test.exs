@@ -5,7 +5,8 @@ use Mix.Config
 config :alastair, Alastair.Endpoint,
   http: [port: 4001],
   server: false,
-  user_service: :static_user
+  user_service: :static_user,
+  event_service: :static_event
 
 # Print only warnings and errors during test
 config :logger, level: :warn

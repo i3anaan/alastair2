@@ -44,7 +44,20 @@ defmodule Alastair.MealController do
   def show(conn, %{"id" => id, "event_id" => event_id}) do
     # Use complicated syntax to make sure you can not escalade privileges
     meal = from(p in Meal, where: p.id == ^id and p.event_id == ^event_id) |> Repo.one!
-    |> Repo.preload([{:meals_recipes, [:recipe]}])
+    |> Repo.preload([{:meals_recipes, [{:recipe, [{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}]}]}])
+
+    # TODO process item count
+    meals_recipes = meal.meals_recipes
+    |> Enum.map(fn(mr) -> 
+      recipes_ingredients = mr.recipe.recipes_ingredients
+      |> Enum.map(fn(ri) ->
+        ri
+        |> Map.put(:item_quantity, ri.quantity * (mr.person_count / mr.recipe.person_count))
+      end)
+
+      Map.update!(mr, :recipe, fn(recipe) -> Map.put(recipe, :recipes_ingredients, recipes_ingredients) end)
+    end)
+    meal = Map.put(meal, :meals_recipes, meals_recipes)
 
     render(conn, "show.json", meal: meal)
   end
@@ -76,9 +89,8 @@ defmodule Alastair.MealController do
   end
 
   def delete(conn, %{"id" => id, "event_id" => event_id}) do
-    from(p in Meal, where: p.id == ^id and p.event_id == ^event_id) |> Repo.one! |> Repo.delete!
-
     from(p in MealRecipe, where: p.meal_id == ^id) |> Repo.delete_all
+    from(p in Meal, where: p.id == ^id and p.event_id == ^event_id) |> Repo.one! |> Repo.delete!
 
     send_resp(conn, :no_content, "")
   end

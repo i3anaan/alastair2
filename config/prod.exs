@@ -15,7 +15,8 @@ config :alastair, Alastair.Endpoint,
   http: [port: {:system, "PORT"}],
   url: [host: "example.com", port: 80],
   cache_static_manifest: "priv/static/manifest.json"
-  user_service: :oms_user
+  user_service: :oms_user,
+  event_service: :static_event
 
 
 # Do not print debug messages in production

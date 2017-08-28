@@ -1,4 +1,4 @@
-<h1 class="page-header">Shopping list for {{ vm.event.id }} </h1>
+<h1 class="page-header">Shopping list for {{ vm.event.name }} </h1>
 
 <button type="button" class="btn btn-primary" ng-click="detailed_view = !detailed_view"><span ng-show="detailed_view">Simple View</span><span ng-show="!detailed_view">Detailed View</span></button>
 <button type="button" class="btn btn-warning" ng-show="vm.unmapped && vm.unmapped.length>0" ng-click="vm.showUnmapped()"><i class="fa fa-exclamation-triangle"></i> Not all ingredients are available in the store!</button>
@@ -28,7 +28,10 @@
         </td>
 
         <td>{{ ingredient.calculated_quantity }}{{ ingredient.ingredient.default_measurement.display_code }}</td>
-        <td>{{ ingredient.chosen_item.item_buying_quantity  }}{{ ingredient.ingredient.default_measurement.display_code }} ({{ ingredient.chosen_item.item_count }} items)
+        <td>
+          {{ ingredient.chosen_item.item_buying_quantity  }}{{ ingredient.ingredient.default_measurement.display_code }} 
+          <span ng-show="detailed_view">({{ ingredient.chosen_item.item_count }} items)</span>
+        </td>
         <td>{{ ingredient.best_price | number:2 }}{{ vm.event.shop.currency.display_code }}</td>
         <td>{{ ingredient.ingredient.name }}</td>
         <td ng-show="detailed_view"><i><small>{{ ingredient.chosen_item.item.comment }}</small></i></td>

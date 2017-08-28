@@ -12,7 +12,8 @@ config :alastair, Alastair.Endpoint,
   code_reloader: true,
   check_origin: false,
   watchers: [],
-  user_service: :oms_user
+  user_service: :oms_user,
+  event_service: :static_event
 
 
 # Watch static and templates for browser reloading.

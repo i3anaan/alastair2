@@ -20,7 +20,8 @@ defmodule Alastair.MealView do
   end
 
   def render("meal_recipe.json", %{meal: meal_recipe}) do
-    %{person_count: meal_recipe.person_count,
+    %{id: meal_recipe.id,
+      person_count: meal_recipe.person_count,
       recipe: render_assoc_one(meal_recipe.recipe, Alastair.RecipeView, "recipe.json"),
       recipe_id: meal_recipe.recipe_id
     }

@@ -75,6 +75,16 @@
             controller: 'ShoppingListController as vm',
           },
         },
+      })
+      .state('app.alastair_organizer.meal', {
+        url: '/event/:event_id/meal/:meal_id',
+        data: { pageTitle: 'Alastair Meal' },
+        views: {
+          'pageContent@app': {
+            templateUrl: `${baseUrl}static/organizers_view/meal.html`,
+            controller: 'MealController as vm',
+          },
+        },
       });
   }
 
@@ -84,18 +94,20 @@
 
   function MyEventsController($http) {
     var vm = this;
-
+    vm.fetching = true;
     $http({
       url: apiUrl + '/events',
       method: 'GET'
     }).then(function(response) {
       vm.events = response.data.data;
+      vm.fetching = false;
     }).catch(function(error) {
       showError(error);
+      vm.fetching = false;
     });
   }
 
-  function EventController($http, $stateParams) {
+  function EventController($http, $stateParams, $scope) {
     var vm = this;
 
     vm.loadEvent = function() {
@@ -123,6 +135,7 @@
         }
       }).then(function(response) {
         vm.event = response.data.data;
+        vm.change_shop = false;
         showSuccess("Shop change successfully saved")
       }).catch(function(error) {
         showError(error);
@@ -157,7 +170,128 @@
       });
     }
 
+    vm.loadMeals = function(callback) {
+      return $http({
+        url: apiUrl + '/events/' + $stateParams.id + '/meals',
+        method: 'GET'
+      }).then(function(response) {
+        vm.meals = response.data.data;
+        if(callback)
+          callback();
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
+
+    vm.newMeal = function() {
+      $('#mealModal').modal('show');
+      vm.edited_meal = {
+        meals_recipes: []
+      };
+      vm.errors = undefined;
+    }
+
+    vm.editMeal = function(meal) {
+      return $http({
+        url: apiUrl + '/events/' + $stateParams.id + '/meals/' + meal.id,
+        method: 'GET'
+      }).then(function(response) {
+        vm.edited_meal = response.data.data;
+        $('#mealModal').modal('show');
+        vm.errors = undefined;
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
+    vm.deleteMeal = function(meal) {
+      return $http({
+        url: apiUrl + '/events/' + $stateParams.id + '/meals/' + meal.id,
+        method: 'DELETE'
+      }).then(function(response) {
+        vm.loadMeals(function() {
+          showSuccess("Meal deleted successfully");
+        });
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
+    vm.addRecipe = function(recipe) {
+      vm.edited_meal.meals_recipes.push({
+        person_count: 1,
+        recipe_id: recipe.originalObject.id,
+        recipe: recipe.originalObject
+      });
+      $scope.$broadcast('angucomplete-alt:clearInput', 'recipeAutocomplete');
+    }
+
+    vm.fetchRecipes = function(query, timeout) {
+      // Copied from the angular tutorial on how to add transformations
+      function appendTransform(defaults, transform) {
+        // We can't guarantee that the default transformation is an array
+        defaults = angular.isArray(defaults) ? defaults : [defaults];
+
+        // Append the new transformation to the defaults
+        return defaults.concat(transform);
+      }
+
+      return $http({
+        url: apiUrl + '/recipes',
+        method: 'GET',
+        params: {
+          limit: 8,
+          query: query
+        },
+        transformResponse: appendTransform($http.defaults.transformResponse, function (res) {
+          if(res && res.data)
+            return res.data;
+          else
+            return [];
+        }),
+        timeout: timeout,
+      });
+    }
+
+    vm.submitForm = function() {
+      // If it has an id POST, otherwise PUT
+      var promise;
+      if(vm.edited_meal.id) {
+        promise = $http({
+          url: apiUrl + '/events/' + $stateParams.id + '/meals/' + vm.edited_meal.id,
+          method: 'PUT',
+          data: {
+            meal: vm.edited_meal
+          }
+        });
+      } else {
+        promise = $http({
+          url: apiUrl + '/events/' + $stateParams.id + '/meals/',
+          method: 'POST',
+          data: {
+            meal: vm.edited_meal
+          }
+        });
+      }
+      promise.then(function(response) {
+        vm.loadMeals(function() {
+          showSuccess('Meal saved successfully');
+          $('#mealModal').modal('hide');
+        });
+      }).catch(function(error) {
+        if(error.status == 422)
+          vm.errors = error.data.errors;
+        else
+          showError(error);
+      });
+
+      return promise;
+    }
+
+
     vm.loadEvent();
+    vm.loadMeals();
   }
 
   function ShoppingListController($http, $stateParams) {
@@ -196,7 +330,11 @@
     }
 
     vm.chooseAltItem = function(item) {
-      vm.alt_ingredient.note.shopping_item_id = item.shopping_item_id;
+      if(!vm.alt_ingredient.note)
+        vm.alt_ingredient.note = {shopping_item_id: item.shopping_item_id};
+      else
+        vm.alt_ingredient.note.shopping_item_id = item.shopping_item_id;
+
       $http({
         url: apiUrl + '/events/' + $stateParams.id + "/shopping_list/note/" + vm.alt_ingredient.ingredient_id,
         method: 'PUT',
@@ -237,12 +375,42 @@
     vm.loadEvent();
   }
 
+  function MealController($http, $stateParams) {
+    var vm = this;
+
+    vm.loadMeal = function() {
+      $http({
+        url: apiUrl + '/events/' + $stateParams.event_id + '/meals/' + $stateParams.meal_id,
+        method: 'GET'
+      }).then(function(response) {
+        vm.meal = response.data.data;
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
+    vm.loadEvent = function() {
+      $http({
+        url: apiUrl + '/events/' + $stateParams.event_id,
+        method: 'GET'
+      }).then(function(response) {
+        vm.event = response.data.data;
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
+    vm.loadEvent();
+    vm.loadMeal();
+  }
+
   angular
     .module('app.alastair_organizer', [])
     .config(config)
     .controller('WelcomeController', WelcomeController)
     .controller('MyEventsController', MyEventsController)
     .controller('EventController', EventController)
-    .controller('ShoppingListController', ShoppingListController);
+    .controller('ShoppingListController', ShoppingListController)
+    .controller('MealController', MealController);
 })();
 

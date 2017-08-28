@@ -3,10 +3,17 @@ defmodule Alastair.EventController do
   alias Alastair.Event
 
   def get_event(id) do
-    case Repo.get_by(Event, id: id) do
+    db_event = case Repo.get_by(Event, id: id) do
       nil -> Repo.insert!(%Event{id: id})
       event -> event
     end
+    remote_event = Alastair.EventService.get_event(id)
+
+    db_event
+    |> Map.put(:name, remote_event.name)
+    |> Map.put(:starts, remote_event.starts)
+    |> Map.put(:ends, remote_event.ends)
+    |> Map.put(:organizers, remote_event.organizers_list)
   end
 
   def get_event_editors(id) do
@@ -21,7 +28,21 @@ defmodule Alastair.EventController do
   def index(conn, params) do
     events = from(p in Event)
     |> Repo.all
-    
+
+    events = events
+    |> Enum.map(fn(event) -> 
+      Task.async(fn -> # Spawn as async tasks as every event involves a GET to oms-events
+        remote_event = Alastair.EventService.get_event(event.id)
+
+        event
+        |> Map.put(:name, remote_event.name)
+        |> Map.put(:starts, remote_event.starts)
+        |> Map.put(:ends, remote_event.ends)
+        |> Map.put(:organizers, remote_event.organizers_list)
+      end)
+    end)
+    |> Enum.map(fn(task) -> Task.await(task) end)
+
     render(conn, "index.json", events: events)
   end
 
@@ -43,6 +64,10 @@ defmodule Alastair.EventController do
 
     case Repo.update(changeset) do
       {:ok, event} ->
+        from(p in Alastair.ShoppingListNote,
+          where: p.event_id == ^id)
+        |> Repo.delete_all
+
         event = Repo.preload(event, [{:shop, [:currency]}])
         |> Map.put(:meals, get_meals(id))
         |> Map.put(:event_editors, get_event_editors(id))

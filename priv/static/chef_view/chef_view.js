@@ -546,33 +546,6 @@
     vm.loadPermissions();
   }
 
-  function SimpleUserDirective($http) {
-
-    function link(scope, elements, attrs) {
-      scope.message = "Fetching user";
-      attrs.$observe('userid', function(value) {
-        $http({
-          url: '/api/users/' + value,
-          method: 'GET'
-        }).then(function(response) {
-          scope.fetched_user=response.data.data;
-          scope.message = "";
-        }).catch(function(error) {
-          scope.message="Could not fetch"
-        });
-      })
-    }
-
-    return {
-      templateUrl: baseUrl + 'static/chef_view/simple_user_directive.html',
-      restrict: 'E',
-      scope: {
-        userid: '@'
-      },
-      link: link,
-    };
-  }
-
   function StarRatingDirective() {
     function link(scope) {
       scope.range = function(items) {
@@ -605,7 +578,6 @@
     .controller('SingleRecipeController', SingleRecipeController)
     .controller('MyRecipesController', MyRecipesController)
     .controller('AdminsController', AdminsController)
-    .directive('omsSimpleUser', SimpleUserDirective)
     .directive('omsStarRating', StarRatingDirective);
 })();
 

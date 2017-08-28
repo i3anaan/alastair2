@@ -105,7 +105,7 @@ defmodule Alastair.Seeds.ExampleSeed do
 		})
 
 		Alastair.Repo.insert!(%Alastair.Review{
-			user_id: "testtest",
+			user_id: "2",
 			review: "Pretty neat recipe, I recommend. Lacks garlic though",
 			rating: 4,
 			recipe: recipe1

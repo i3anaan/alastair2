@@ -7,7 +7,7 @@ defmodule Alastair.EventService do
   # For tests and until oms-events is stable again
   def static_event(event_id) do
     %{id: event_id,
-      name: event_id <> " (not implemented)",
+      name: event_id,
       starts: Ecto.DateTime.cast!("2015-08-05T08:40:51.620Z"),
       ends: Ecto.DateTime.cast!("2015-08-10T08:40:51.620Z"),
       organizers_list: [%{

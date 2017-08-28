@@ -15,7 +15,8 @@ defmodule Alastair.Router do
   scope "/api", Alastair do
     pipe_through :api
 
-    get "/user", AdminsController, :own_user
+    get "/user", AdminController, :own_user
+    resources "/admins", AdminController, except: [:new, :edit, :update]
 
     scope "/events/:event_id", as: :event do
       resources "/meals", MealController, except: [:new, :edit]

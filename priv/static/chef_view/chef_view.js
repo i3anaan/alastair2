@@ -134,7 +134,8 @@
             templateUrl: `${baseUrl}static/chef_view/my_recipes.html`,
             controller: 'MyRecipesController as vm'
           }
-        }      })
+        }      
+      })
       .state('app.alastair_chef.single_recipe', {
         url: '/recipes/:id',
         data: { pageTitle: 'Alastair Single Recipe' },
@@ -147,7 +148,17 @@
             controller: 'SingleRecipeController as vm'
           }
         }
-      });
+      })
+      .state('app.alastair_chef.admins', {
+        url: '/admins',
+        data: { pageTitle: 'Alastair Admins' },
+        views: {
+          'pageContent@app': {
+            templateUrl: `${baseUrl}static/chef_view/admins.html`,
+            controller: 'AdminsController as vm'
+          }
+        }
+      })
   }
 
 
@@ -160,13 +171,22 @@
 
     // TODO fetch permissions from backend
     vm.permissions = {
-      superuser: true
+      superuser: false
     };
 
 
     vm.measurements = [];
 
-
+    vm.loadPermissions = function() {
+      return $http({
+        url: apiUrl + '/user',
+        method: 'GET'
+      }).then(function(response) {
+        vm.permissions.superuser = response.data.data.superadmin;
+      }).catch(function(error) {
+        showError();
+      });
+    }
 
     vm.submitForm = function() {
       // If if has an id, we should put there
@@ -233,6 +253,7 @@
 
     infiniteScroll($http, vm, apiUrl + 'ingredients');
     loadMeasurements($http, vm);
+    vm.loadPermissions();
   }
 
   function RecipeController($http) {
@@ -426,6 +447,105 @@
     loadMeasurements($http, vm);
   }
 
+  function AdminsController($http) {
+    var vm = this;
+
+    vm.permissions = {
+      superuser: false
+    };
+
+    vm.busy = true;
+
+    vm.fetchUsers = function(query, timeout) {
+      // Copied from the angular tutorial on how to add transformations
+      function appendTransform(defaults, transform) {
+        // We can't guarantee that the default transformation is an array
+        defaults = angular.isArray(defaults) ? defaults : [defaults];
+
+        // Append the new transformation to the defaults
+        return defaults.concat(transform);
+      }
+
+      return $http({
+        url: '/api/users',
+        method: 'GET',
+        params: {
+          limit: 8,
+          name: query
+        },
+        transformResponse: appendTransform($http.defaults.transformResponse, function (res) {
+          if(res && res.data)
+            return res.data.map(function(item) {
+              item.name = item.first_name + ' ' + item.last_name;
+              item.user_id = '' + item.id;
+              delete item.id;
+              return item;
+            });
+          else
+            return [];
+        }),
+        timeout: timeout,
+      });
+    }
+
+    vm.loadPermissions = function() {
+      return $http({
+        url: apiUrl + '/user',
+        method: 'GET'
+      }).then(function(response) {
+        vm.permissions.superuser = response.data.data.superadmin;
+      }).catch(function(error) {
+        showError();
+      });
+    }
+
+
+    vm.loadAdmins = function(callback) {
+      return $http({
+        url: apiUrl + '/admins',
+        method: 'GET'
+      }).then(function(response) {
+        vm.admins = response.data.data;
+        if(callback)
+          callback();
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
+    vm.deleteAdmin = function(user) {
+      return $http({
+        url: apiUrl + '/admins/' + user.id,
+        method: 'DELETE'
+      }).then(function(response) {
+        vm.loadAdmins(function() {
+          showSuccess("User removed as admin");
+        });
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
+    vm.addAdmin = function(user) {
+      return $http({
+        url: apiUrl + '/admins/',
+        method: 'POST',
+        data: {
+          admin: user.originalObject
+        }
+      }).then(function(response) {
+        vm.loadAdmins(function() {
+          showSuccess("User added as admin");
+        })
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
+    vm.loadAdmins(function() {vm.busy = false;});
+    vm.loadPermissions();
+  }
+
   function SimpleUserDirective($http) {
 
     function link(scope, elements, attrs) {
@@ -484,6 +604,7 @@
     .controller('RecipeController', RecipeController)
     .controller('SingleRecipeController', SingleRecipeController)
     .controller('MyRecipesController', MyRecipesController)
+    .controller('AdminsController', AdminsController)
     .directive('omsSimpleUser', SimpleUserDirective)
     .directive('omsStarRating', StarRatingDirective);
 })();

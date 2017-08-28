@@ -1,0 +1,46 @@
+<!-- TODO should be included in core -->
+<link rel="stylesheet" href="https://ghiden.github.io/angucomplete-alt/css/angucomplete-alt.css">
+
+<p class="alert alert-info" ng-show="vm.permissions.superuser">
+You are a superadmin! Additionally to the here shown admins, also super_admins in oms-core do have admin permissions.
+</p>
+
+<div class="table-responsive">
+  <table class="table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th ng-show="vm.permissions.superuser">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="user in vm.admins">
+        <td><oms-simple-user userid="{{ user.user_id }}"></oms-simple-user></td>
+        <td ng-show="vm.permissions.superuser">
+          <button type="button" class="btn btn-sm btn-danger" ng-click="vm.deleteAdmin(user)"><i class="fa fa-minus"></i></button>
+        </td>
+      </tr>
+      <tr ng-show="vm.permissions.superuser">
+        <td>
+          <angucomplete-alt 
+            id="usersAutocomplete"
+            placeholder="Search users"
+            pause="50"
+            selected-object="tmpUser"
+            remote-api-handler="vm.fetchUsers"
+            title-field="name"
+            description-field=""
+            minlength="1"
+            input-class="form-control form-control-small">
+          </angucomplete-alt>
+        </td>
+        <td>
+          <button type="button" class="btn btn-sm btn-success" ng-click="vm.addAdmin(tmpUser)"><i class="fa fa-plus"></i></button>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>
+
+<span ng-show="!vm.busy && !vm.admins.length">No admins in database. To assign one, ask the global oms superadmin to create one</span>
+<span ng-show="vm.busy">Searching...</span>

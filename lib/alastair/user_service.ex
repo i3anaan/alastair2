@@ -6,12 +6,28 @@ defmodule Alastair.UserService do
     Plug.Conn.assign(conn, :user, %{id: "asd123", first_name: "Nico", last_name: "Westerbeck", superadmin: true})
   end
 
+  defp fetch_admin(user_id) do
+    user = Repo.get_by(Alastair.Admin, user_id: user_id)
+
+    user != nil
+  end
+
+
   defp convert_to_string(anything) do
     case anything do
       n when is_float(n) -> to_string(n)
       n when is_integer(n) -> to_string(n)
       n when is_number(n) -> to_string(n)
       n -> n
+    end
+  end
+
+  defp convert_to_boolean(anything) do
+    case anything do
+      n when is_bitstring(n) -> n == "1"
+      n when is_number(n) -> n == 1
+      n when is_boolean(n) -> n
+      _ -> false
     end
   end
 
@@ -23,8 +39,10 @@ defmodule Alastair.UserService do
         relevant? = fn (x) -> Enum.find(atoms, fn(a) -> Atom.to_string(a) == x end) end
         user = for {key, val} <- body["data"], relevant?.(key), into: %{}, do: {String.to_existing_atom(key), convert_to_string(val)}
         user = user 
-        |> Map.put(:superadmin, user.is_superadmin) # TODO fetch this from stored superadmins
+        |> Map.put(:superadmin, convert_to_boolean(user.is_superadmin) || fetch_admin(user.id)) 
         |> Map.delete(:is_superadmin)
+
+
 
         Plug.Conn.assign(conn, :user, user)
       _ -> 

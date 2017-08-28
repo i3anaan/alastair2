@@ -1,7 +1,10 @@
-version: '2'
+version: '3.2'
 
 services:
     alastair:
+        build:
+            context: ./$PATH_ALASTAIR/alastair/
+            dockerfile: ./Dockerfile.dev
         image: aegee/alastair:dev
         volumes:
             - ./alastair:/usr/src/myapp
@@ -31,3 +34,8 @@ services:
 volumes:
     postgres-alastair:
         driver: "local"
+
+networks:
+  default:
+    external:
+      name: OMS

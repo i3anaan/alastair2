@@ -47,7 +47,7 @@ defmodule Alastair.ShoppingListController do
 
     # On empty map we are done
     if Enum.empty?(Map.keys(ingredients)) do
-      render(conn, "list.json", items: [])
+      render(conn, "list.json", items: [], unmapped: [], accumulates: %{price: 0, count: 0})
     else
       # Fetch shopping_items for those ris from db
       shopping_items = from(p in Alastair.ShoppingItem,

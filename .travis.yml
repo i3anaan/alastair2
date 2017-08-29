@@ -1,0 +1,14 @@
+language: shell
+dist: trusty
+sudo: required
+
+services:
+  - docker
+
+before_script:
+    - cd docker
+    - docker network create OMS
+
+
+script:
+    - sudo docker-compose run alastair mix test

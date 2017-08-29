@@ -11,6 +11,16 @@ defmodule Alastair.Router do
     plug :fetch_user
   end
 
+  pipeline :general do
+    plug :accepts, ["json"]
+  end
+
+  scope "/", Alastair do
+      get "/status", GeneralController, :status
+  end
+
+
+
   # Other scopes may use custom stacks.
   scope "/api", Alastair do
     pipe_through :api

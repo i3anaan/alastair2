@@ -69,13 +69,20 @@ defmodule Alastair.UserService do
   end
 
   def oms_user(conn) do
-    token = hd(Plug.Conn.get_req_header(conn, "x-auth-token"));
-    case HTTPoison.post("http://omscore-nginx/api/tokens/user", "{\"token\": \"" <> token <> "\"}", [{"Content-Type", "application/json"}, {"X-Auth-Token", token}]) do
-      {:ok, response} -> check_error(conn, response)
-      {:error, _error} ->     
-        conn
-        |> Plug.Conn.put_status(:internal_server_error)
-        |> render(Alastair.ErrorView, "error.json", message: "Could not contact core")
+    tmp = Plug.Conn.get_req_header(conn, "x-auth-token")
+    if tmp != [] do
+       token = hd(tmp);
+      case HTTPoison.post("http://omscore-nginx/api/tokens/user", "{\"token\": \"" <> token <> "\"}", [{"Content-Type", "application/json"}, {"X-Auth-Token", token}]) do
+        {:ok, response} -> check_error(conn, response)
+        {:error, _error} ->     
+          conn
+          |> Plug.Conn.put_status(:internal_server_error)
+          |> render(Alastair.ErrorView, "error.json", message: "Could not contact core")
+      end
+    else
+      conn
+      |> Plug.Conn.put_status(:unauthorized)
+      |> render(Alastair.ErrorView, "error.json", message: "No auth token provided")
     end
   end
 end

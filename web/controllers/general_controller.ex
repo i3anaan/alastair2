@@ -17,11 +17,11 @@ defmodule Alastair.GeneralController do
     if check_db == :ok do      
       conn 
       |> put_resp_content_type("application/json") 
-      |> send_resp(200, "{\"success\": \"1\"}")
+      |> send_resp(200, "{\"success\": true}")
     else   
       conn 
       |> put_resp_content_type("application/json") 
-      |> send_resp(500, "{\"success\": \"0\"}")
+      |> send_resp(500, "{\"success\": false}")
     end
 
 

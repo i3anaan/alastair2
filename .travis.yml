@@ -8,7 +8,10 @@ services:
 before_script:
     - cd docker
     - docker network create OMS
+    - sudo docker-compose build
+    - sudo docker-compose up -d
+    - sudo docker-compose exec alastair ash /usr/src/scripts/bootstrap.sh
 
 
 script:
-    - sudo docker-compose run alastair mix test
+    - sudo docker-compose exec alastair mix test

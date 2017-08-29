@@ -10,6 +10,7 @@ before_script:
     - docker network create OMS
     - sudo docker-compose build
     - sudo docker-compose up -d
+    - sudo docker-compose logs -f alastair &
     - sudo docker-compose exec alastair ash /usr/src/scripts/wait.sh
 
 

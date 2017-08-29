@@ -7,7 +7,7 @@ services:
             dockerfile: ./Dockerfile.dev
         image: aegee/alastair:dev
         volumes:
-            - ./alastair:/usr/src/myapp
+            - ./$PATH_ALASTAIR/../:/usr/src/myapp
         depends_on:
             - postgres-alastair
         expose:

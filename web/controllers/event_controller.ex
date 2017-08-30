@@ -25,7 +25,7 @@ defmodule Alastair.EventController do
   end
 
   # TODO only list own users events
-  def index(conn, params) do
+  def index(conn, _params) do
     events = from(p in Event)
     |> Repo.all
 

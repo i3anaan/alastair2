@@ -1,7 +1,7 @@
 defmodule Alastair.GeneralController do
   use Alastair.Web, :controller
 
-  defp check_db do
+  defp check_db() do
     try do
         measurements = Alastair.Repo.all(Alastair.Measurement)
         if Enum.empty?(measurements) do
@@ -14,7 +14,7 @@ defmodule Alastair.GeneralController do
   end
 
   def status(conn, _params) do
-    if check_db == :ok do      
+    if check_db() == :ok do      
       conn 
       |> put_resp_content_type("application/json") 
       |> send_resp(200, "{\"success\": true}")

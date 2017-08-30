@@ -132,7 +132,7 @@ defmodule Alastair.ShoppingListController do
       |> ShoppingListNote.changeset(note_params)
 
       case Repo.insert_or_update(changeset) do
-        {:ok, note} ->
+        {:ok, _note} ->
           conn
           |> send_resp(:ok, "")
         {:error, changeset} ->

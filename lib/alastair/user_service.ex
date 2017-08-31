@@ -3,7 +3,12 @@ defmodule Alastair.UserService do
 
   # For tests so they can run without the core being up
   def static_user(conn) do
-    Plug.Conn.assign(conn, :user, %{id: "asd123", first_name: "Nico", last_name: "Westerbeck", superadmin: true})
+    tmp = Plug.Conn.get_req_header(conn, "x-auth-token")
+    if tmp == [] || hd(tmp) == "admin" do
+      Plug.Conn.assign(conn, :user, %{id: "asd123", first_name: "Nico", last_name: "Westerbeck", superadmin: true})
+    else
+      Plug.Conn.assign(conn, :user, %{id: "asd123", first_name: "Nico", last_name: "Westerbeck", superadmin: false})
+    end
   end
 
   defp fetch_admin(user_id) do

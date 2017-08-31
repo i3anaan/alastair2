@@ -7,6 +7,7 @@ defmodule Alastair.Shop do
     belongs_to :currency, Alastair.Currency
 
     has_many :shopping_items, Alastair.ShoppingItem
+    has_many :shop_admins, Alastair.ShopAdmin
 
     timestamps()
   end

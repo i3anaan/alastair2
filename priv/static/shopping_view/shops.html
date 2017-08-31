@@ -27,6 +27,7 @@
           <td>{{ shop.location }}</td>
           <td>{{ shop.currency.name }}</td>
           <td>
+            <a ui-sref="app.alastair_shopping.admins({id: shop.id})" class="btn btn-sm btn-info"><i class="fa fa-user"></i></a>
             <button type="button" class="btn btn-sm btn-warning" ng-click="vm.editShop(shop)"><i class="fa fa-pencil"></i></button>
             <a ui-sref="app.alastair_shopping.items({id: shop.id})" class="btn btn-sm btn-info"><i class="fa fa-list"></i></a>
             <button type="button" class="btn btn-sm btn-danger" ng-click="vm.deleteShop(shop)"><i class="fa fa-minus"></i></button>
@@ -47,15 +48,15 @@
 
 
 
-<!-- ########################### Ingredient modal ###################### -->
+<!-- ########################### Shop modal ###################### -->
 <div class="modal fade" id="shopModal">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
-                <h4 class="modal-title">Ingredient add/edit</h4>
+                <h4 class="modal-title">Shop add/edit</h4>
             </div>
-            <form name="shopForm" ng-submit="vm.submitForm()" class="margin-bottom-0" novalidate>
+            <form name="shopForm" ng-submit="vm.submitForm()" class="margin-bottom-0" novalidate ng-show="vm.edited_shop.permissions.shop_admin">
                 <div class="modal-body">
                     <div class="form-group m-b-20">
                         <label for="name">Name*</label>
@@ -78,6 +79,9 @@
                     <button type="submit" ng-disabled="bodyForm.$pristine || bodyForm.$invalid" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Save </button>
                 </div>
             </form>
+            <p ng-show="!vm.edited_shop.permissions.shop_admin">
+            You are not entitled to edit this shop! Please ask a shop admin to do the changes for you!
+            </p>
         </div>
     </div>
 </div>

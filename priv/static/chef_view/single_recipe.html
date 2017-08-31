@@ -39,7 +39,7 @@
       <small ng-show="vm.recipe.avg_review"><oms-star-rating score="vm.recipe.avg_review", max="5"></oms-star-rating></small>
       <small ng-show="!vm.recipe.avg_review">No reviews yet</small>
     </h3>
-    <div class="input-group" ng-show="!vm.our_review">
+    <div class="input-group m-b-20" ng-show="!vm.our_review">
       <div class="input-group-btn">
         <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" aria-expanded="false">
           <oms-star-rating score="vm.review.rating", max="5"></oms-star-rating>
@@ -60,7 +60,7 @@
           <button class="btn btn-primary" type="button" ng-click="vm.sendReview()">Send</button>
       </span>
     </div>
-    <div class="input-group" ng-show="vm.our_review">
+    <div class="input-group m-b-20" ng-show="vm.our_review">
       You already reviewed this recipe. <button type="button" class="btn btn-link" ng-click="vm.deleteReview()">Click to retract</button>
     </div>
     <ul class="chats">

@@ -3,6 +3,7 @@ defmodule Alastair.ShopController do
   import Alastair.Helper
 
   alias Alastair.Shop
+  alias Alastair.ShopAdmin
 
   def index(conn, params) do
     shops = from(p in Shop,
@@ -21,6 +22,11 @@ defmodule Alastair.ShopController do
     case Repo.insert(changeset) do
       {:ok, shop} ->
         shop = Repo.preload(shop, [:currency])
+
+        Repo.insert! %ShopAdmin{
+          user_id: conn.assigns.user.id,
+          shop: shop
+        }
 
         conn
         |> put_status(:created)
@@ -41,18 +47,28 @@ defmodule Alastair.ShopController do
   end
 
   def update(conn, %{"id" => id, "shop" => shop_params}) do
-    shop = Repo.get!(Shop, id)
-    |> Repo.preload([:currency])
-    changeset = Shop.changeset(shop, shop_params)
+    conn = Alastair.ShopAdminController.fetch_shop_role(conn, id)
 
-    case Repo.update(changeset) do
-      {:ok, shop} ->
-        render(conn, "show.json", shop: shop)
-      {:error, changeset} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> render(Alastair.ChangesetView, "error.json", changeset: changeset)
+    if conn.assigns.shop_admin do
+      shop = Repo.get!(Shop, id)
+      |> Repo.preload([:currency])
+      changeset = Shop.changeset(shop, shop_params)
+
+      case Repo.update(changeset) do
+        {:ok, shop} ->
+          render(conn, "show.json", shop: shop)
+        {:error, changeset} ->
+          conn
+          |> put_status(:unprocessable_entity)
+          |> render(Alastair.ChangesetView, "error.json", changeset: changeset)
+      end
+    else
+      conn
+      |> put_status(:forbidden)
+      |> render(Alastair.ErrorView, "error.json", message: "Only shop admins can edit shop details")
     end
+
+
   end
 
   def delete(conn, %{"id" => id}) do
@@ -60,6 +76,7 @@ defmodule Alastair.ShopController do
       shop = Repo.get!(Shop, id)
 
       from(p in Alastair.ShoppingItem, where: p.shop_id == ^id) |> Repo.delete_all
+      from(p in Alastair.ShopAdmin, where: p.shop_id == ^id) |> Repo.delete_all
 
       # Here we use delete! (with a bang) because we expect
       # it to always work (and if it does not, it will raise).

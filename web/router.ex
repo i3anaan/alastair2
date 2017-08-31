@@ -15,6 +15,7 @@ defmodule Alastair.Router do
     plug :accepts, ["json"]
   end
 
+
   scope "/", Alastair do
       get "/status", GeneralController, :status
   end
@@ -44,7 +45,11 @@ defmodule Alastair.Router do
 
     resources "/shops", ShopController, except: [:new, :edit] do
       resources "/shopping_items", ShoppingItemController, except: [:new, :edit]
+      resources "/admins", ShopAdminController, only: [:index, :create, :delete]
+      get "/user", ShopAdminController, :own_user
     end
+   
+
     resources "/currencies", CurrencyController, only: [:index]
     resources "/measurements", MeasurementController, only: [:index]
   end

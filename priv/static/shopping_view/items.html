@@ -8,7 +8,8 @@
     </div>
   </div>
   <div class="col-lg-6" >
-    <a ui-sref="app.alastair_shopping.matching({id: vm.shop.id})" class="btn btn-success"><i class="fa fa-arrow-right"></i><i class="fa fa-arrow-left"></i>&nbsp;Matching mode</a>
+    <a ui-sref="app.alastair_shopping.matching({id: vm.shop.id})" class="btn btn-success" ng-show="vm.permissions.shop_admin"><i class="fa fa-arrow-right"></i><i class="fa fa-arrow-left"></i>&nbsp;Matching mode</a>
+    <a ui-sref="app.alastair_shopping.admins({id: vm.shop.id})" class="btn btn-info"><i class="fa fa-user"></i> Shop Admins</a>
   </div>
 </div>
 
@@ -22,7 +23,7 @@
           <th>Buying quantity</th>
           <th>Mapped ingredient</th>
           <th>Comment</th>
-          <th>Actions</th>
+          <th ng-show="vm.permissions.shop_admin">Actions</th>
         </tr>
       </thead>
       <tbody>
@@ -35,7 +36,7 @@
           </td>
           <td>{{ item.mapped_ingredient.name }}</td>
           <td><i><small>{{ item.comment }}</small></i></td>
-          <td>
+          <td ng-show="vm.permissions.shop_admin">
             <button type="button" class="btn btn-sm btn-danger" ng-click="vm.deleteItem(item)"><i class="fa fa-minus"></i></button>
           </td>
         </tr>

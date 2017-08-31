@@ -132,10 +132,20 @@ defmodule Alastair.Seeds.ExampleSeed do
 			currency: euro
 		})
 
-		Alastair.Repo.insert!(%Alastair.Shop{
+		shop2 = Alastair.Repo.insert!(%Alastair.Shop{
 			name: "Edeka",
 			location: "Dresden",
 			currency: euro
+		})
+
+		Alastair.Repo.insert!(%Alastair.ShopAdmin{
+			user_id: "3",
+			shop: shop1
+		})
+
+		Alastair.Repo.insert!(%Alastair.ShopAdmin{
+			user_id: "1",
+			shop: shop2
 		})
 
 		Alastair.Repo.insert!(%Alastair.ShoppingItem{

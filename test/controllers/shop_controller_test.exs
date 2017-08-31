@@ -2,8 +2,10 @@ defmodule Alastair.ShopControllerTest do
   use Alastair.ConnCase
 
   alias Alastair.Shop
+  alias Alastair.ShopAdmin
   @valid_attrs %{location: "some content", name: "some content"}
   @invalid_attrs %{currency_id: -1}
+  @user_id "asd123"
 
   setup %{conn: conn} do
     {:ok, conn: put_req_header(conn, "accept", "application/json")}
@@ -59,11 +61,28 @@ defmodule Alastair.ShopControllerTest do
       location: "blablabla",
       currency: euro
     }
+    Repo.insert! %ShopAdmin{
+      user_id: @user_id,
+      shop: shop
+    }
 
 
     conn = put conn, shop_path(conn, :update, shop), shop: @valid_attrs
     assert json_response(conn, 200)["data"]["id"]
     assert Repo.get_by(Shop, @valid_attrs)
+  end
+
+  test "does not update chosen resource when requested by a non-shop-admin", %{conn: conn} do
+    %{:euro => euro} = Alastair.Seeds.CurrencySeed.run
+    shop = Repo.insert! %Shop{
+      name: "blablabla",
+      location: "blablabla",
+      currency: euro
+    }
+
+    conn = put_req_header(conn, "x-auth-token", "nonadmin")
+    conn = put conn, shop_path(conn, :update, shop), shop: @valid_attrs
+    assert json_response(conn, 403)
   end
 
   test "does not update chosen resource and renders errors when data is invalid", %{conn: conn} do
@@ -73,6 +92,11 @@ defmodule Alastair.ShopControllerTest do
       location: "blablabla",
       currency: euro
     }
+    Repo.insert! %ShopAdmin{
+      user_id: @user_id,
+      shop: shop
+    }
+
 
     conn = put conn, shop_path(conn, :update, shop), shop: @invalid_attrs
     assert json_response(conn, 422)["errors"] != %{}
@@ -85,9 +109,31 @@ defmodule Alastair.ShopControllerTest do
       location: "blablabla",
       currency: euro
     }
+    Repo.insert! %ShopAdmin{
+      user_id: @user_id,
+      shop: shop
+    }
     
     conn = delete conn, shop_path(conn, :delete, shop)
     assert response(conn, 204)
     refute Repo.get(Shop, shop.id)
+  end
+
+  test "does not delete chosen resource when requested by a non-superadmin", %{conn: conn} do
+    %{:euro => euro} = Alastair.Seeds.CurrencySeed.run
+    shop = Repo.insert! %Shop{
+      name: "blablabla",
+      location: "blablabla",
+      currency: euro
+    }
+    Repo.insert! %ShopAdmin{
+      user_id: @user_id,
+      shop: shop
+    }
+    
+    conn = put_req_header(conn, "x-auth-token", "nonadmin")
+    conn = delete conn, shop_path(conn, :delete, shop)
+    assert response(conn, 403)
+    assert Repo.get(Shop, shop.id)
   end
 end

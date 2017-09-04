@@ -88,7 +88,6 @@ defmodule Alastair.RecipeControllerTest do
     assert json_response(conn, 422)["errors"] != %{}
   end
 
-  @tag mustexec: true
   test "does not create resource when errors are in recipes_ingredients", %{conn: conn} do
     %{:ml => ml} = Alastair.Seeds.MeasurementSeed.run()
     ingredient = Repo.insert! %Alastair.Ingredient{
@@ -245,6 +244,7 @@ defmodule Alastair.RecipeControllerTest do
 
   test "deletes chosen resource when unpublished", %{conn: conn} do
     recipe = Repo.insert! %Recipe{created_by: @userid}
+    conn = put_req_header(conn, "x-auth-token", "nonadmin")
     conn = delete conn, recipe_path(conn, :delete, recipe)
     assert response(conn, 204)
     refute Repo.get(Recipe, recipe.id)
@@ -252,14 +252,23 @@ defmodule Alastair.RecipeControllerTest do
 
   test "does not delete resource by another user", %{conn: conn} do
     recipe = Repo.insert! %Recipe{created_by: "another-invalid-id"}
+    conn = put_req_header(conn, "x-auth-token", "nonadmin")
     conn = delete conn, recipe_path(conn, :delete, recipe)
     assert response(conn, 405)
   end
 
   test "does not delete chosen resource when published", %{conn: conn} do
     recipe = Repo.insert! %Recipe{published: true}
+    conn = put_req_header(conn, "x-auth-token", "nonadmin")
     conn = delete conn, recipe_path(conn, :delete, recipe)
     assert response(conn, 405)
     assert Repo.get(Recipe, recipe.id)
+  end
+
+  test "superadmins can always delete the resource", %{conn: conn} do
+    recipe = Repo.insert! %Recipe{published: true}
+    conn = delete conn, recipe_path(conn, :delete, recipe)
+    assert response(conn, 204)
+    refute Repo.get(Recipe, recipe.id)
   end
 end

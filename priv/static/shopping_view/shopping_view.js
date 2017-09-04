@@ -127,7 +127,7 @@
         views: {
           'pageContent@app': {
             templateUrl: `${baseUrl}static/shopping_view/admins.html`,
-            controller: 'AdminsController as vm',
+            controller: 'ShopAdminsController as vm',
           },
         }
       });
@@ -375,7 +375,7 @@
     vm.loadPermissions();
   }
 
-  function AdminsController($http, $stateParams) {
+  function ShopAdminsController($http, $stateParams) {
     var vm = this;
 
     vm.permissions = {
@@ -498,6 +498,6 @@
     .controller('ShopsController', ShopsController)
     .controller('ItemsController', ItemsController)
     .controller('MatchingController', MatchingController)
-    .controller('AdminsController', AdminsController);
+    .controller('ShopAdminsController', ShopAdminsController);
 })();
 

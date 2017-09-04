@@ -284,6 +284,7 @@
         method: 'GET'
       }).then(function(response) {
         vm.recipe = response.data.data;
+        vm.permissions = response.data.meta.permissions;
         // Check if we already reviewed this recipe
         vm.our_review = vm.recipe.reviews.find((item) => {return item.user_id == $rootScope.currentUser.id});
       }).catch(function(error) {

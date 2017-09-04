@@ -6,8 +6,21 @@ defmodule Alastair.RecipeView do
     %{data: render_many(recipes, Alastair.RecipeView, "recipe.json")}
   end
 
+  def render("show.json", %{recipe: recipe, permissions: permissions}) do
+    %{data: render_one(recipe, Alastair.RecipeView, "recipe.json"), 
+      meta: render_one(permissions, Alastair.RecipeView, "permissions.json")
+    }
+  end
+
   def render("show.json", %{recipe: recipe}) do
     %{data: render_one(recipe, Alastair.RecipeView, "recipe.json")}
+  end
+
+  def render("permissions.json", %{recipe: permissions}) do
+    %{permissions: %{
+      edit_recipe: permissions.edit_recipe,
+      delete_recipe: permissions.delete_recipe
+    }}
   end
 
   def render("recipe.json", %{recipe: recipe}) do

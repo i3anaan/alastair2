@@ -51,10 +51,21 @@ defmodule Alastair.RecipeController do
     end
   end
 
+  defp determine_permissions(recipe, user) do
+    own = recipe.created_by == user.id
+
+    %{edit_recipe: user.superadmin || (!recipe.published && own),
+      delete_recipe: user.superadmin || (!recipe.published && own)
+    }
+  end
+
   def show(conn, %{"id" => id}) do
     recipe = Repo.get!(Recipe, id)
       |> Repo.preload([{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}, :reviews]) # Preload nested recipe_ingredient and ingredient and measurement
-    render(conn, "show.json", recipe: recipe)
+    
+    permissions = determine_permissions(recipe, conn.assigns.user)
+
+    render(conn, "show.json", recipe: recipe, permissions: permissions)
   end
 
 
@@ -139,21 +150,22 @@ defmodule Alastair.RecipeController do
   def delete(conn, %{"id" => id}) do
     recipe = Repo.get!(Recipe, id) 
 
-    if recipe.published do
+    if recipe.published && !conn.assigns.user.superadmin do
       conn
       |> put_status(:method_not_allowed)
       |> render(Alastair.ErrorView, "error.json", message: "You can not delete a published recipe")
     else
-      if recipe.created_by != conn.assigns.user.id do
+      if recipe.created_by != conn.assigns.user.id && !conn.assigns.user.superadmin do
         conn
         |> put_status(:method_not_allowed)
         |> render(Alastair.ErrorView, "error.json", message: "You can not delete a recipe which is not yours")
       else
-        recipe |> Repo.delete!
 
         from(p in Alastair.RecipeIngredient, where: p.recipe_id == ^id) |> Repo.delete_all
         from(p in Alastair.Review, where: p.recipe_id == ^id) |> Repo.delete_all
         from(p in Alastair.MealRecipe, where: p.recipe_id == ^id) |> Repo.delete_all # Should not exist yet, just to make sure
+
+        recipe |> Repo.delete!
         send_resp(conn, :no_content, "")
       end
     end

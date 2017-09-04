@@ -19,7 +19,7 @@ x Validation errors in good Format
 x Tests
 x Mismatching measurements shopping_item/ingredient - idea: shopping_item - ingredient many to many?
 o Alternative measurements in recipe?
-o Forward errors in recipes_ingredients and meals_recipes
+x Forward errors in recipes_ingredients and meals_recipes
 o Searching in multiple fields
 o Request to check if ingredient was already matched in the store
 x Shopping list unmatched ingredients

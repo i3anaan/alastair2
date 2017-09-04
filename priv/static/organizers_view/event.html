@@ -73,7 +73,12 @@
                     <div class="form-group m-b-20">
                         <label>Date*</label>
                         <!-- TODO use datepicker -->
-                        <input type="text" class="form-control" ng-model="vm.edited_meal.date" />
+                        <div class="input-group">
+                          <input type="text" class="form-control" datepicker-popup ng-model="vm.edited_meal.date" is-open="_picker_opened" datepicker-options="vm.edited_meal.date_options" ng-required="true" close-text="Close"  />
+                          <span class="input-group-btn">
+                            <button type="button" class="btn btn-default" ng-click="_picker_opened=!_picker_opened;"><i class="fa fa-calendar"></i></button>
+                          </span>
+                        </div>
                         <p class="label label-danger" ng-show="vm.errors.date">{{ vm.errors.date }}</p>
                     </div>
                     <div class="form-group m-b-20">

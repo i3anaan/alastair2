@@ -202,6 +202,10 @@
         $('#mealModal').modal('show');
         vm.errors = undefined;
         $scope.$broadcast('angucomplete-alt:clearInput', 'recipeAutocomplete');
+        vm.edited_meal.date_options = {
+          minDate: null,
+          maxDate: null
+        }
       }).catch(function(error) {
         showError(error);
       });

@@ -28,6 +28,26 @@ defmodule Alastair.AdminController do
     end
   end
 
+  def set_active(conn, %{"id" => id, "active" => active}) do
+    admin = Repo.get!(Admin, id)
+    if(admin.user_id == conn.assigns.user.id) do
+      changeset = Admin.changeset(admin, %{"active" => active})
+      case Repo.update(changeset) do
+        {:ok, admin} ->
+          conn
+          |> render("show.json", admin: admin)
+        {:error, changeset} ->
+          conn
+          |> put_status(:unprocessable_entity)
+          |> render(Alastair.ChangesetView, "error.json", changeset: changeset)
+      end
+    else
+      conn
+      |> put_status(:forbidden)
+      |> render(Alastair.ErrorView, "error.json", message: "You can not set the activity status of another admin but you")
+    end
+  end
+
   def show(conn, %{"id" => id}) do
     admin = Repo.get!(Admin, id)
     render(conn, "show.json", admin: admin)

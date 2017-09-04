@@ -454,7 +454,7 @@
     loadMeasurements($http, vm);
   }
 
-  function AdminsController($http) {
+  function AdminsController($http, $rootScope) {
     var vm = this;
 
     vm.permissions = {
@@ -513,6 +513,7 @@
         method: 'GET'
       }).then(function(response) {
         vm.admins = response.data.data;
+        vm.me = vm.admins.find((i) => {return i.user_id == $rootScope.currentUser.id})
         if(callback)
           callback();
       }).catch(function(error) {
@@ -544,6 +545,22 @@
         vm.loadAdmins(function() {
           showSuccess("User added as admin");
         })
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
+    vm.setAdminEnabled = function(value) {
+      $http({
+        url: apiUrl + '/admins/' + vm.me.id,
+        method: 'PUT',
+        data: {
+          active: value
+        }
+      }).then(function(response) {
+        vm.loadAdmins(function() {vm.busy = false;});
+        vm.loadPermissions();
+        showSuccess("Successfully triggered admin mode");
       }).catch(function(error) {
         showError(error);
       });

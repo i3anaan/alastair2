@@ -28,6 +28,7 @@ defmodule Alastair.Router do
 
     get "/user", AdminController, :own_user
     resources "/admins", AdminController, except: [:new, :edit, :update]
+    put "/admins/:id", AdminController, :set_active
 
     scope "/events/:event_id", as: :event do
       resources "/meals", MealController, except: [:new, :edit]

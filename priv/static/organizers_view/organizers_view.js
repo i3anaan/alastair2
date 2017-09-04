@@ -190,6 +190,7 @@
         meals_recipes: []
       };
       vm.errors = undefined;
+      $scope.$broadcast('angucomplete-alt:clearInput', 'recipeAutocomplete');
     }
 
     vm.editMeal = function(meal) {
@@ -200,6 +201,7 @@
         vm.edited_meal = response.data.data;
         $('#mealModal').modal('show');
         vm.errors = undefined;
+        $scope.$broadcast('angucomplete-alt:clearInput', 'recipeAutocomplete');
       }).catch(function(error) {
         showError(error);
       });

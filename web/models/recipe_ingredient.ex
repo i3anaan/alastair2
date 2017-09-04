@@ -13,8 +13,8 @@ defmodule Alastair.RecipeIngredient do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:quantity, :comment, :recipe_id, :ingredient_id])
-    |> validate_required([:quantity, :recipe_id, :ingredient_id])
+    |> cast(params, [:quantity, :comment, :ingredient_id])
+    |> validate_required([:quantity, :ingredient_id])
     |> validate_length(:comment, max: 100)
     |> foreign_key_constraint(:recipe_id)
     |> foreign_key_constraint(:ingredient_id)

@@ -8,7 +8,7 @@ defmodule Alastair.Meal do
     field :event_id, :string
 
     many_to_many :recipes, Alastair.Recipe, join_through: Alastair.MealRecipe
-    has_many :meals_recipes, Alastair.MealRecipe
+    has_many :meals_recipes, Alastair.MealRecipe, on_replace: :delete
 
     timestamps()
   end
@@ -19,6 +19,7 @@ defmodule Alastair.Meal do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:name, :event_id, :date, :time]) # TODO remove event_id from casts
+    |> cast_assoc(:meals_recipes, required: false)
     |> validate_required([:name, :event_id, :date])
   end
 end

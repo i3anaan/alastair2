@@ -4,7 +4,7 @@ defmodule Alastair.Event do
   @primary_key {:id, :string, []}
   @derive {Phoenix.Param, key: :id}
   schema "events" do
-    belongs_to :shop, Alastair.Shop
+    belongs_to :shop, Alastair.Shop, on_replace: :nilify
 
     has_many :meals, Alastair.Meal
   end

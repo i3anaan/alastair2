@@ -83,6 +83,7 @@
                       <p class="label label-danger" ng-show="vm.errors.time">{{ vm.errors.time }}</p>
                     </div>
                     <h2>Recipes</h2>
+                    <p class="label label-danger" ng-show="vm.errors.recipes_ingredients">Some recipes could not be validated</p>
                     <div class="row m-b-10 alert" style="background: #ddd;" ng-repeat="mr in vm.edited_meal.meals_recipes">
                       <div class="row">
                         <div class="col-md-3">
@@ -90,10 +91,12 @@
                             <input type="number" class="form-control" ng-model="mr.person_count">
                             <span class="input-group-addon">ppl</span>
                           </div>
+                          <p class="label label-danger" ng-show="vm.errors.meals_recipes[$index].person_count">{{ vm.errors.meals_recipes[$index].person_count }}</p>
                         </div>
                         <div class="col-md-9">
                           <label style="padding-top: 8px;" >{{ mr.recipe.name }}</label>
                           <button class="btn btn-sm btn-danger pull-right" ng-click="vm.edited_meal.meals_recipes.splice($index, 1)"><i class="fa fa-minus"></i></button>
+                          <p class="label label-danger" ng-show="vm.errors.meals_recipes[$index].recipe_id">{{ vm.errors.meals_recipes[$index].recipe_id }}</p>
                         </div>
                       </div>
                     </div>

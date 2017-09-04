@@ -62,7 +62,7 @@ defmodule Alastair.UserService do
   defp check_error(conn, response) do
     case response.status_code do
       200 -> parse_oms_user(conn, response)
-      403 ->         
+      401 ->         
         conn
         |> Plug.Conn.put_status(:unauthorized)
         |> render(Alastair.ErrorView, "error.json", message: "Core did not authenticate token")

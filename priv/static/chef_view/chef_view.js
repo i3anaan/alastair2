@@ -293,13 +293,19 @@
 
     vm.newRecipe = function() {
       $('#recipeModal').modal('show');
-      if(!vm.create)
-        vm.edited_recipe = {};
+      vm.recipes_ingredients_error_offset = 0;
+      if(!vm.create || !vm.edited_recipe)
+        vm.edited_recipe = {
+          recipes_ingredients: []
+        };
+      vm.errors = {};
     }
 
     vm.editRecipe = function() {
       $('#recipeModal').modal('show');
+      vm.recipes_ingredients_error_offset = vm.recipe.recipes_ingredients.length;
       vm.edited_recipe = angular.copy(vm.recipe);
+      vm.errors = {};
     }
 
     vm.submitForm = function() {

@@ -3,7 +3,6 @@ defmodule Alastair.RecipeController do
 
   import Alastair.Helper
   alias Alastair.Recipe
-  alias Alastair.RecipeIngredient
 
   def index(conn, params) do
     recipes = from(p in Recipe, 
@@ -27,21 +26,6 @@ defmodule Alastair.RecipeController do
     render(conn, "index.json", recipes: recipes)
   end
 
-  defp create_recipe_ingredient(recipe_id, ingredient_id, quantity) do
-    changeset = RecipeIngredient.changeset(%RecipeIngredient{}, %{recipe_id: recipe_id, ingredient_id: ingredient_id, quantity: quantity})
-    # TODO add error handling
-    Repo.insert(changeset)
-  end
-
-  defp reset_recipe_ingredients(recipe, recipes_ingredients) do
-    from(p in RecipeIngredient, where: p.recipe_id == ^recipe.id) |> Repo.delete_all
-
-    recipes_ingredients
-    |> Enum.uniq_by(fn(x) -> x["ingredient_id"] end) # TODO merge duplicate ingredients into one
-    |> Enum.map(fn(x) -> create_recipe_ingredient(recipe.id, x["ingredient_id"], x["quantity"]) end)
-    |> Enum.find({:ok, nil}, fn(x) -> elem(x, 1) == :error end)
-  end
-
   def create(conn, %{"recipe" => recipe_params}) do
     changeset = Recipe.changeset(%Recipe{created_by: conn.assigns.user.id}, recipe_params)
 
@@ -54,12 +38,6 @@ defmodule Alastair.RecipeController do
         |> Ecto.Changeset.force_change(:root_version_id, recipe.id)
         |> Repo.update!
 
-        # If there are ingredients, add them
-        if Map.get(recipe_params, "recipes_ingredients", nil) != nil do
-          reset_recipe_ingredients(recipe, recipe_params["recipes_ingredients"])
-        end
-
-        # To properly display the results, preload everything
         recipe = Repo.preload(recipe, [{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}], force: true)
 
         conn
@@ -79,6 +57,7 @@ defmodule Alastair.RecipeController do
     render(conn, "show.json", recipe: recipe)
   end
 
+
   # An unpublished recipe can be edited directly
   defp update_unpublished(conn, recipe, recipe_params) do
     changeset = Recipe.changeset(recipe, recipe_params)
@@ -91,10 +70,6 @@ defmodule Alastair.RecipeController do
     if max_version <= recipe.version do
       case Repo.update(changeset) do
         {:ok, recipe} ->
-          # Delete all ingredients and add all again
-          if Map.get(recipe_params, "recipes_ingredients", nil) != nil do
-            reset_recipe_ingredients(recipe, recipe_params["recipes_ingredients"])
-          end
           recipe = Repo.preload(recipe, [{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}], force: true)
 
           render(conn, "show.json", recipe: recipe)
@@ -125,15 +100,6 @@ defmodule Alastair.RecipeController do
 
     case Repo.insert(changeset) do
       {:ok, recipe} ->
-
-        # Either use the recipes_ingredients from the request if present or otherwise copy over the old ones
-        if Map.get(recipe_params, "recipes_ingredients", nil) != nil do
-          reset_recipe_ingredients(recipe, recipe_params["recipes_ingredients"])
-        else
-          old_recipe.recipes_ingredients
-          |> Enum.map(fn(x) -> create_recipe_ingredient(recipe.id, x.ingredient_id, x.quantity) end)
-        end
-
         recipe = Repo.preload(recipe, [{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}], force: true)
 
         render(conn, "show.json", recipe: recipe)

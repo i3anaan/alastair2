@@ -14,7 +14,7 @@ defmodule Alastair.Recipe do
 
     many_to_many :meals, Alastair.Meal, join_through: Alastair.MealRecipe
     many_to_many :ingredients, Alastair.Ingredient, join_through: Alastair.RecipeIngredient
-    has_many :recipes_ingredients, Alastair.RecipeIngredient
+    has_many :recipes_ingredients, Alastair.RecipeIngredient, on_replace: :delete
     has_many :reviews, Alastair.Review
 
     timestamps()
@@ -26,6 +26,7 @@ defmodule Alastair.Recipe do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:name, :description, :person_count, :instructions, :published])
+    |> cast_assoc(:recipes_ingredients, required: false)
     |> validate_required([:name, :person_count, :instructions])
     |> validate_number(:person_count, greater_than: 0)
     |> validate_length(:name, min: 5, max: 100)

@@ -112,6 +112,7 @@
                       <p class="label label-danger" ng-show="vm.errors.person_count">{{ vm.errors.person_count }}</p>
                     </div>
                     <h2>Ingredients <small>for {{ vm.edited_recipe.person_count }} persons</small></h2>
+                    <p class="label label-danger" ng-show="vm.errors.recipes_ingredients">Some ingredients could not be validated</p>
                     <div class="row m-b-10 alert" style="background: #ddd;" ng-repeat="ri in vm.edited_recipe.recipes_ingredients">
                       <div class="row">
                         <div class="col-md-3">
@@ -119,18 +120,22 @@
                             <input type="number" class="form-control" ng-model="ri.quantity">
                             <span class="input-group-addon">{{ ri.ingredient.default_measurement.display_code }}</span>
                           </div>
+                          <p class="label label-danger" ng-show="vm.errors.recipes_ingredients[$index + vm.recipes_ingredients_error_offset].quantity">{{ vm.errors.recipes_ingredients[$index + vm.recipes_ingredients_error_offset].quantity }}</p>
                         </div>
                         <div class="col-md-9">
                           <label style="padding-top: 8px;" >{{ ri.ingredient.name }}</label>
                           <button class="btn btn-sm btn-danger pull-right" ng-click="vm.edited_recipe.recipes_ingredients.splice($index, 1)"><i class="fa fa-minus"></i></button>
+                          <p class="label label-danger" ng-show="vm.errors.recipes_ingredients[$index + vm.recipes_ingredients_error_offset].ingredient_id">{{ vm.errors.recipes_ingredients[$index + vm.recipes_ingredients_error_offset].ingredient_id }}</p>
                         </div>
                       </div>
                       <div class="row">
                         <div class="col-md-12 input-group">
                           <input type="text" class="form-control" ng-model="ri.comment" placeholder="Add a comment">
                           <span class="input-group-addon">Comment</span>
+                          <p class="label label-danger" ng-show="vm.errors.recipes_ingredients[$index + vm.recipes_ingredients_error_offset].comment">{{ vm.errors.recipes_ingredients[$index + vm.recipes_ingredients_error_offset].comment }}</p>
                         </div>
                       </div>
+                      
                     </div>
                     <div class="row m-b-10 alert" style="background: #ddd;">
                       <div class="row">

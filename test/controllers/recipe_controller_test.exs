@@ -88,6 +88,19 @@ defmodule Alastair.RecipeControllerTest do
     assert json_response(conn, 422)["errors"] != %{}
   end
 
+  @tag mustexec: true
+  test "does not create resource when errors are in recipes_ingredients", %{conn: conn} do
+    %{:ml => ml} = Alastair.Seeds.MeasurementSeed.run()
+    ingredient = Repo.insert! %Alastair.Ingredient{
+      name: "Cream",
+      description: "Milkproduct",
+      default_measurement_id: ml.id
+    }
+
+    conn = post conn, recipe_path(conn, :create), recipe: Map.put(@valid_attrs, :recipes_ingredients, [%{ingredient_id: ingredient.id, quantity: -100.0}])
+    assert json_response(conn, 422)["errors"]["recipes_ingredients"] != %{}
+  end
+
   test "updates and renders chosen resource when data is valid", %{conn: conn} do
     attrs = @valid_attrs
     |> Map.put(:published, false)
@@ -139,6 +152,30 @@ defmodule Alastair.RecipeControllerTest do
     conn = put conn, recipe_path(conn, :update, recipe), recipe: @invalid_attrs
     assert json_response(conn, 422)["errors"] != %{}
   end
+
+  test "does not update resource when errors in recipes_ingredients", %{conn: conn} do
+    attrs = @valid_attrs
+    |> Map.put(:published, false)
+    conn = post conn, recipe_path(conn, :create), recipe: attrs
+    assert json_response(conn, 201)["data"]["id"]
+    recipe = Repo.get!(Recipe, json_response(conn, 201)["data"]["id"])
+
+    %{:ml => ml} = Alastair.Seeds.MeasurementSeed.run()
+    ingredient = Repo.insert! %Alastair.Ingredient{
+      name: "Cream",
+      description: "Milkproduct",
+      default_measurement_id: ml.id
+    }
+
+    Repo.insert! %Alastair.RecipeIngredient{
+      recipe: recipe,
+      ingredient: ingredient,
+      quantity: 50.0
+    }    
+
+    conn = put conn, recipe_path(conn, :update, recipe), recipe: Map.put(@valid_attrs, :recipes_ingredients, [%{ingredient_id: ingredient.id, quantity: -100.0}])
+    assert json_response(conn, 422)["errors"]["recipes_ingredients"] != %{}
+   end
 
   test "does not unpublish a published resource", %{conn: conn} do
     attrs = @valid_attrs

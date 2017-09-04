@@ -65,6 +65,13 @@ defmodule Alastair.MealControllerTest do
     assert json_response(conn, 422)["errors"] != %{}
   end
 
+  test "does not create resource when errors in meals_recipes", %{conn: conn} do
+    recipe = Repo.insert! %Alastair.Recipe{description: "some content", instructions: "some content", name: "some content", person_count: 42}
+
+    conn = post conn, event_meal_path(conn, :create, @event), meal: Map.put(@valid_attrs, :meals_recipes, [%{person_count: -1, recipe_id: recipe.id}])
+    assert json_response(conn, 422)["errors"]["meals_recipes"] != %{}
+  end
+
   test "updates and renders chosen resource when data is valid", %{conn: conn} do
     meal = Repo.insert! %Meal{name: "some other content", time: @meal_time, date: @meal_date, event_id: @event}
     conn = put conn, event_meal_path(conn, :update, @event, meal), meal: @valid_attrs
@@ -95,11 +102,21 @@ defmodule Alastair.MealControllerTest do
     assert Repo.get_by(Meal, %{name: "some content", event_id: @event})
   end
 
-#  test "does not update chosen resource and renders errors when data is invalid", %{conn: conn} do
-#    meal = Repo.insert! %Meal{name: "some other content", time: @meal_time, event_id: @event}
-#    conn = put conn, event_meal_path(conn, :update, @event, meal), meal: @invalid_attrs
-#    assert json_response(conn, 422)["errors"] != %{}
-#  end
+  test "does not update chosen resource and renders errors when data is invalid", %{conn: conn} do
+    meal = Repo.insert! %Meal{name: "some other content", time: @meal_time, event_id: @event}
+    conn = put conn, event_meal_path(conn, :update, @event, meal), meal: @invalid_attrs
+    assert json_response(conn, 422)["errors"] != %{}
+  end
+
+  test "does not update chosen resource when errors in meals_recipes", %{conn: conn} do
+    recipe = Repo.insert! %Alastair.Recipe{description: "some content", instructions: "some content", name: "some content", person_count: 42}
+    meal = Repo.insert! %Meal{name: "some other content", time: @meal_time, date: @meal_date, event_id: @event}
+    Repo.insert! %Alastair.MealRecipe{person_count: 10, meal: meal, recipe: recipe}
+
+    conn = put conn, event_meal_path(conn, :update, @event, meal), meal: Map.put(@valid_attrs, :meals_recipes, [%{person_count: -20, recipe_id: recipe.id}])
+    assert json_response(conn, 422)["errors"]["meals_recipes"]
+  end
+
 
   test "deletes chosen resource", %{conn: conn} do
     meal = Repo.insert! %Meal{name: "some other content", time: @meal_time, date: @meal_date, event_id: @event}

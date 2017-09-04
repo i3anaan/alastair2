@@ -10,12 +10,6 @@ defmodule Alastair.MealController do
     render(conn, "index.json", meals: meals)
   end
 
-  defp create_meal_recipe(recipe_id, meal_id, person_count) do
-    changeset = MealRecipe.changeset(%MealRecipe{}, %{recipe_id: recipe_id, meal_id: meal_id, person_count: person_count})
-    # TODO add error handling
-    Repo.insert!(changeset)
-  end
-
   def create(conn, %{"meal" => meal_params, "event_id" => event_id}) do
     # TODO check if event exists
     # TODO check if user has access rights
@@ -23,12 +17,7 @@ defmodule Alastair.MealController do
 
     case Repo.insert(changeset) do
       {:ok, meal} ->
-        if Map.get(meal_params, "meals_recipes", nil) != nil do
-          meal_params["meals_recipes"]
-          |> Enum.uniq_by(fn(x) -> x["recipe_id"] end)
-          |> Enum.map(fn(x) -> create_meal_recipe(x["recipe_id"], meal.id, x["person_count"]) end)
-        end
-        meal = Repo.preload(meal, [{:meals_recipes, [:recipe]}])
+        meal = Repo.preload(meal, [{:meals_recipes, [:recipe]}], force: true)
 
         conn
         |> put_status(:created)
@@ -64,20 +53,15 @@ defmodule Alastair.MealController do
 
   def update(conn, %{"id" => id, "meal" => meal_params, "event_id" => event_id}) do
     # TODO check if user has access rights
-    meal = from(p in Meal, where: p.id == ^id and p.event_id == ^event_id) |> Repo.one!
+    meal = from(p in Meal, 
+      where: p.id == ^id and p.event_id == ^event_id,
+      preload: [:meals_recipes])
+    |> Repo.one!
     changeset = Meal.changeset(meal, meal_params)
 
     case Repo.update(changeset) do
       {:ok, meal} ->
 
-        if Map.get(meal_params, "meals_recipes", nil) != nil do
-          from(p in MealRecipe, where: p.meal_id == ^meal.id) |> Repo.delete_all
-
-          meal_params["meals_recipes"]
-          |> Enum.uniq_by(fn(x) -> x["recipe_id"] end)
-          |> Enum.map(fn(x) -> create_meal_recipe(x["recipe_id"], meal.id, x["person_count"]) end)
-        end
-        
         meal = Repo.preload(meal, [{:meals_recipes, [:recipe]}])
 
         render(conn, "show.json", meal: meal)

@@ -94,8 +94,8 @@ defmodule Alastair.ShoppingListController do
 
         ri
         |> Map.put(:items, items)
-        |> Map.put(:best_price, best_item.item_price)
-        |> Map.put(:chosen_item, best_item) # TODO implement option to choose mapping for ingredients
+        |> Map.put(:best_price, cheapest_item.item_price)
+        |> Map.put(:chosen_item, best_item) 
         |> Map.put(:note, note)
       end)
       |> Enum.reduce({[], []}, fn(i, {mapped, unmapped}) -> # Split off unmapped ingredients
@@ -109,7 +109,7 @@ defmodule Alastair.ShoppingListController do
       accumulates = Enum.reduce(ingredients, %{count: 0, price: 0}, fn(ingredient, acc) ->
         acc
         |> Map.update!(:count, &(&1 + 1))
-        |> Map.update!(:price, &(&1 + ingredient.best_price))
+        |> Map.update!(:price, &(&1 + ingredient.chosen_item.item_price))
       end)
 
 

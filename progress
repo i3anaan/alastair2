@@ -10,20 +10,21 @@ x Event listing
 o Event editors, event permissions
 x Event/Shop
 x Shopping list
-o Shop editors, shop permissions
-o Global editors
+x Shop editors, shop permissions
+x Global editors
 x OMS integration
 x Shop listing, creation
 x Shopping items, mapping to ingredients
 x Validation errors in good Format
 x Tests
 x Mismatching measurements shopping_item/ingredient - idea: shopping_item - ingredient many to many?
-o Alternative measurements in recipe
+o Alternative measurements in recipe?
 o Forward errors in recipes_ingredients and meals_recipes
 o Searching in multiple fields
 o Request to check if ingredient was already matched in the store
 x Shopping list unmatched ingredients
 x Shopping list ticked items and chosen mappings
+o Shopping list limit view to some days
 
 Frontend
 x Serve static files on /static
@@ -40,3 +41,4 @@ x Matching view
 x Meals
 x Shopping list
 o Shopping list date sliders
+x Download shopping list as csv

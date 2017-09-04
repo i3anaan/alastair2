@@ -371,6 +371,41 @@
       $('#unmappedModal').modal('show');
     }
 
+    vm.makeCsv = function(data) {
+      var list = data.map(function(item) {
+        var retval = {
+          needed_quantity: item.calculated_quantity,
+          ingredient_name: item.ingredient.name,
+          measurement: item.ingredient.default_measurement.name,
+          ticked: false
+        }
+        if(item.chosen_item) {
+          retval.price = item.chosen_price;
+          retval.item_quantity = item.chosen_item.item_buying_quantity;
+          retval.item_unit_count = item.chosen_item.item_count;
+          retval.item_name = item.chosen_item.shopping_item.name;
+          retval.item_unit_price = item.chosen_item.shopping_item.price;
+          retval.item_unit_quantity = item.chosen_item.shopping_item.buying_quantity;
+          retval.item_comment = item.chosen_item.shopping_item.comment;
+        }
+        if(item.note) {
+          retval.ticked = item.note.ticked;
+        }
+
+        return retval;
+      });
+
+      var csvString = convertToCsv(list); // defined in the core
+      var a = document.createElement('a');
+      a.href = 'data:attachment/csv,' +  encodeURIComponent(csvString);
+      a.target = '_blank';
+      a.download = 'shopping_list.csv';
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+
     vm.loadList();
     vm.loadEvent();
   }

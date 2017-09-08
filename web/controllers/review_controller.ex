@@ -25,6 +25,16 @@ defmodule Alastair.ReviewController do
           case Repo.insert(changeset) do
             {:ok, review} ->
               Alastair.RecipeController.update_avg_review(recipe_id)
+              Alastair.NotificationService.dispatch_notification(Plug.Conn.get_req_header(conn, "x-auth-token"), %Alastair.Notification{
+                audience_type: "user",
+                audience_params: [recipe.created_by],
+                category: "alastair.review",
+                category_name: "New recipe review",
+                heading: "New review",
+                heading_link: "app.alastair_chef.single_recipe",
+                heading_link_params: %{id: recipe.id},
+                body: "You have a new " <> Integer.to_string(review.rating) <> " star rating on your recipe " <> recipe.name
+              })
 
               conn
               |> put_status(:created)

@@ -8,5 +8,7 @@ defmodule Alastair.Repo.Migrations.CreateAdmins do
 
       timestamps()
     end
+    create unique_index(:admins, [:user_id])
+
   end
 end

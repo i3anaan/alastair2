@@ -3,7 +3,7 @@ defmodule Alastair.ShopAdminControllerTest do
 
   alias Alastair.Shop
   alias Alastair.ShopAdmin
-  @invalid_attrs %{user_id: "1", shop_id: -1}
+  @invalid_attrs %{}
   @user_id "asd123"
 
   setup %{conn: conn} do
@@ -75,6 +75,30 @@ defmodule Alastair.ShopAdminControllerTest do
 
     conn = post conn, shop_shop_admin_path(conn, :create, shop), shop_admin: @invalid_attrs
     assert json_response(conn, 422)["errors"] != %{}
+  end
+
+  test "does not allow duplicate entries", %{conn: conn} do
+    %{:euro => euro} = Alastair.Seeds.CurrencySeed.run
+    shop = Repo.insert! %Shop{
+      name: "some content",
+      location: "some content",
+      currency: euro
+    }
+    Repo.insert! %ShopAdmin{
+      user_id: @user_id,
+      shop: shop
+    }
+
+    valid_attrs = %{
+      user_id: "1",
+      shop_id: shop.id
+    }
+
+    conn = post conn, shop_shop_admin_path(conn, :create, shop), shop_admin: valid_attrs
+    assert json_response(conn, 201)["data"]["id"]
+    assert Repo.get_by(ShopAdmin, valid_attrs)
+    conn = post conn, shop_shop_admin_path(conn, :create, shop), shop_admin: valid_attrs
+    assert json_response(conn, 422)
   end
 
   test "does not create resource when requested by a non-shop-admin", %{conn: conn} do

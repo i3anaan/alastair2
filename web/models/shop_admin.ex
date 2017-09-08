@@ -16,5 +16,6 @@ defmodule Alastair.ShopAdmin do
     |> cast(params, [:user_id, :shop_id])
     |> validate_required([:user_id, :shop_id])
     |> foreign_key_constraint(:shop_id)
+    |> unique_constraint(:user_id, name: :shop_admins_shop_id_user_id_index)
   end
 end

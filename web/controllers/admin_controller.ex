@@ -17,6 +17,17 @@ defmodule Alastair.AdminController do
 
     case Repo.insert(changeset) do
       {:ok, admin} ->
+
+        Alastair.NotificationService.dispatch_notification(Plug.Conn.get_req_header(conn, "x-auth-token"), %Alastair.Notification{
+          audience_type: "user",
+          audience_params: [admin.user_id],
+          category: "alastair.superadmin",
+          category_name: "Alastair admin status",
+          heading: "You are admin now",
+          heading_link: "app.alastair_chef.admins",
+          body: "You have been appointed alastair superadmin by " <> conn.assigns.user.first_name <> " " <> conn.assigns.user.last_name
+        })
+
         conn
         |> put_status(:created)
         |> put_resp_header("location", admin_path(conn, :show, admin))
@@ -34,6 +45,7 @@ defmodule Alastair.AdminController do
       changeset = Admin.changeset(admin, %{"active" => active})
       case Repo.update(changeset) do
         {:ok, admin} ->
+
           conn
           |> render("show.json", admin: admin)
         {:error, changeset} ->
@@ -55,6 +67,16 @@ defmodule Alastair.AdminController do
 
   def delete(conn, %{"id" => id}) do
     admin = Repo.get!(Admin, id)
+
+    Alastair.NotificationService.dispatch_notification(Plug.Conn.get_req_header(conn, "x-auth-token"), %Alastair.Notification{
+      audience_type: "user",
+      audience_params: [admin.user_id],
+      category: "alastair.superadmin",
+      category_name: "Alastair admin status",
+      heading: "You are no admin anymore",
+      heading_link: "app.alastair_chef.admins",
+      body: "You have been dismissed as alastair superadmin by " <> conn.assigns.user.first_name <> " " <> conn.assigns.user.last_name
+    })
 
     # Here we use delete! (with a bang) because we expect
     # it to always work (and if it does not, it will raise).

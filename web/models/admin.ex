@@ -15,5 +15,6 @@ defmodule Alastair.Admin do
     struct
     |> cast(params, [:user_id, :active])
     |> validate_required([:user_id])
+    |> unique_constraint(:user_id)
   end
 end

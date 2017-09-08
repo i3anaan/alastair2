@@ -46,6 +46,20 @@ defmodule Alastair.IngredientControllerTest do
     assert Repo.get_by(Ingredient, valid_attrs)
   end
 
+  test "does not create resource when requested by a non-admin", %{conn: conn} do
+    %{:ml => ml} = Alastair.Seeds.MeasurementSeed.run()
+    valid_attrs = %{
+      name: "Cream",
+      description: "Milkproduct",
+      default_measurement_id: ml.id
+    }
+
+    conn = put_req_header(conn, "x-auth-token", "nonadmin")
+    conn = post conn, ingredient_path(conn, :create), ingredient: valid_attrs
+    assert json_response(conn, 403)
+    refute Repo.get_by(Ingredient, valid_attrs)
+  end
+
   test "does not create resource and renders errors when data is invalid", %{conn: conn} do
     invalid_attrs = %{
       name: "Cream",
@@ -72,6 +86,21 @@ defmodule Alastair.IngredientControllerTest do
     assert Repo.get(Ingredient, ingredient.id).name == "Sour Cream"
   end
 
+  test "does not update resource when requested by a non-admin", %{conn: conn} do
+    %{:ml => ml} = Alastair.Seeds.MeasurementSeed.run()
+    valid_attrs = %Alastair.Ingredient{
+      name: "Cream",
+      description: "Milkproduct",
+      default_measurement_id: ml.id
+    }
+
+    ingredient = Repo.insert! valid_attrs
+    conn = put_req_header(conn, "x-auth-token", "nonadmin")
+    conn = put conn, ingredient_path(conn, :update, ingredient), ingredient: %{name: "Sour Cream"}
+    assert json_response(conn, 403)
+    refute Repo.get(Ingredient, ingredient.id).name == "Sour Cream"
+  end
+
   test "does not update chosen resource and renders errors when data is invalid", %{conn: conn} do
     ingredient = Repo.insert! %Ingredient{}
     conn = put conn, ingredient_path(conn, :update, ingredient), ingredient: %{default_measurement_id: -1}
@@ -83,5 +112,13 @@ defmodule Alastair.IngredientControllerTest do
     conn = delete conn, ingredient_path(conn, :delete, ingredient)
     assert response(conn, 204)
     refute Repo.get(Ingredient, ingredient.id)
+  end
+
+  test "does not delete chosen resource when requested by a non-admin", %{conn: conn} do
+    ingredient = Repo.insert! %Ingredient{}
+    conn = put_req_header(conn, "x-auth-token", "nonadmin")
+    conn = delete conn, ingredient_path(conn, :delete, ingredient)
+    assert response(conn, 403)
+    assert Repo.get(Ingredient, ingredient.id)
   end
 end

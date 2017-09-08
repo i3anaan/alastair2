@@ -17,20 +17,25 @@ defmodule Alastair.IngredientController do
   end
 
   def create(conn, %{"ingredient" => ingredient_params}) do
+    if conn.assigns.user.superadmin do
+      changeset = Ingredient.changeset(%Ingredient{}, ingredient_params)
 
-    changeset = Ingredient.changeset(%Ingredient{}, ingredient_params)
-
-    case Repo.insert(changeset) do
-      {:ok, ingredient} ->
-        ingredient = Repo.preload(ingredient, :default_measurement)
-        conn
-        |> put_status(:created)
-        |> put_resp_header("location", ingredient_path(conn, :show, ingredient))
-        |> render("show.json", ingredient: ingredient)
-      {:error, changeset} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> render(Alastair.ChangesetView, "error.json", changeset: changeset)
+      case Repo.insert(changeset) do
+        {:ok, ingredient} ->
+          ingredient = Repo.preload(ingredient, :default_measurement)
+          conn
+          |> put_status(:created)
+          |> put_resp_header("location", ingredient_path(conn, :show, ingredient))
+          |> render("show.json", ingredient: ingredient)
+        {:error, changeset} ->
+          conn
+          |> put_status(:unprocessable_entity)
+          |> render(Alastair.ChangesetView, "error.json", changeset: changeset)
+      end
+    else
+      conn
+      |> put_status(:forbidden)
+      |> render(Alastair.ErrorView, "error.json", message: "Only alastair admins can create ingredients")
     end
   end
 
@@ -40,16 +45,22 @@ defmodule Alastair.IngredientController do
   end
 
   def update(conn, %{"id" => id, "ingredient" => ingredient_params}) do
-    ingredient = Repo.get!(Ingredient, id)
-    changeset = Ingredient.changeset(ingredient, ingredient_params)
+    if conn.assigns.user.superadmin do
+      ingredient = Repo.get!(Ingredient, id)
+      changeset = Ingredient.changeset(ingredient, ingredient_params)
 
-    case Repo.update(changeset) do
-      {:ok, ingredient} ->
-        render(conn, "show.json", ingredient: ingredient)
-      {:error, changeset} ->
-        conn
-        |> put_status(:unprocessable_entity)
-        |> render(Alastair.ChangesetView, "error.json", changeset: changeset)
+      case Repo.update(changeset) do
+        {:ok, ingredient} ->
+          render(conn, "show.json", ingredient: ingredient)
+        {:error, changeset} ->
+          conn
+          |> put_status(:unprocessable_entity)
+          |> render(Alastair.ChangesetView, "error.json", changeset: changeset)
+      end
+    else
+      conn
+      |> put_status(:forbidden)
+      |> render(Alastair.ErrorView, "error.json", message: "Only alastair admins can edit ingredients")
     end
   end
 
@@ -68,7 +79,7 @@ defmodule Alastair.IngredientController do
     else
       conn
       |> put_status(:forbidden)
-      |> render(Alastair.ErrorView, "error.json", message: "You cannot delete ingredients")
+      |> render(Alastair.ErrorView, "error.json", message: "Only alastair admins can delete ingredients")
     end
   end
 end

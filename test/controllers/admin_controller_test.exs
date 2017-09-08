@@ -39,9 +39,7 @@ defmodule Alastair.AdminControllerTest do
     assert Repo.get_by(Admin, @valid_attrs)
     conn = post conn, admin_path(conn, :create), admin: @valid_attrs
     assert json_response(conn, 422)
-
   end
-
 
   test "does not create resource and renders errors when data is invalid", %{conn: conn} do
     conn = post conn, admin_path(conn, :create), admin: @invalid_attrs

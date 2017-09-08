@@ -43,6 +43,8 @@ defmodule Alastair.Router do
     end
     get "/my_recipes", RecipeController, :index_mine
     resources "/ingredients", IngredientController, except: [:new, :edit]
+    resources "/ingredient_requests", IngredientRequestController, except: [:new, :edit, :delete]
+
 
     resources "/shops", ShopController, except: [:new, :edit] do
       resources "/shopping_items", ShoppingItemController, except: [:new, :edit]

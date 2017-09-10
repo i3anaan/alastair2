@@ -188,7 +188,7 @@
       $('#mealModal').modal('show');
       vm.edited_meal = {
         meals_recipes: [],
-        time: new Date()
+        picked_time: new Date()
       };
       vm.errors = undefined;
       $scope.$broadcast('angucomplete-alt:clearInput', 'recipeAutocomplete');
@@ -208,9 +208,9 @@
           maxDate: null
         };
         if(vm.edited_meal.time)
-          vm.edited_meal.time = new Date('2017-09-10T' + vm.edited_meal.time);
+          vm.edited_meal.picked_time = new Date('2017-09-10T' + vm.edited_meal.time);
         else
-          vm.edited_meal.time = new Date();
+          vm.edited_meal.picked_time = new Date();
       }).catch(function(error) {
         showError(error);
       });
@@ -279,8 +279,8 @@
     vm.submitForm = function() {
       // If it has an id POST, otherwise PUT
       var promise;
-      var time = new Date(vm.edited_meal.time);
-      vm.edited_meal.time = time.getHours() + ':' + time.getMinutes() + ':00';
+      var time = new Date(vm.edited_meal.picked_time);
+      vm.edited_meal.time = ("0" + time.getHours()).slice(-2) + ':' +  ("0" + time.getMinutes()).slice(-2) + ':00';
       if(vm.edited_meal.id) {
         promise = $http({
           url: apiUrl + '/events/' + $stateParams.id + '/meals/' + vm.edited_meal.id,

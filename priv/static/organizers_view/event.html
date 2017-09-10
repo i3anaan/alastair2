@@ -43,7 +43,14 @@
     <tbody>
       <tr ng-repeat="meal in vm.meals">
         <td>{{ meal.date | date:'EEE d.M'}}</td>
-        <td><a ui-sref="app.alastair_organizer.meal({event_id: vm.event.id, meal_id: meal.id})">{{ meal.name }}</a></td>
+        <td>
+          <a ui-sref="app.alastair_organizer.meal({event_id: vm.event.id, meal_id: meal.id})">{{ meal.name }}</a>
+          <ul>
+            <li ng-repeat="mr in meal.meals_recipes">
+              {{ mr.person_count }} ppl <a ui-sref="app.alastair_chef.single_recipe({id: mr.recipe.id})">{{ mr.recipe.name }}</a>
+            </li>
+          </ul>
+        </td>
         <td>{{ meal.time | date:'hh:mm'}}</td>
         <td>
           <a class="btn btn-primary btn-sm" ui-sref="app.alastair_organizer.meal({event_id: vm.event.id, meal_id: meal.id})"><i class="fa fa-list"></i> Show</a>
@@ -84,7 +91,7 @@
                     </div>
                     <div class="form-group m-b-20">
                       <label>Time</label>
-                      <div timepicker ng-model="vm.edited_meal.time" hour-step="1" minute-step="15" show-meridian="false" show-spinners="false"></div>
+                      <div timepicker ng-model="vm.edited_meal.picked_time" hour-step="1" minute-step="15" show-meridian="false" show-spinners="false"></div>
                       <p class="label label-danger" ng-show="vm.errors.time">{{ vm.errors.time }}</p>
                     </div>
                     <h2>Recipes <small>Add as many recipes to a meal as you wish</small></h2>

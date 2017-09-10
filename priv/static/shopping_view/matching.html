@@ -1,6 +1,9 @@
 <!-- TODO should be included in core -->
 <link rel="stylesheet" href="https://ghiden.github.io/angucomplete-alt/css/angucomplete-alt.css">
 
+<p class="alert alert-info" ng-show="vm.show_help">This page is designed to be opened on a smartphone while you are in the supermarket. Set up matchings for ingredients, so you have a price calculation in your event</p>
+
+<a ui-sref="app.alastair_shopping.items({id: vm.shop.id})"><-- Back to list</a>
 <h1 class="page-header">Matching for {{ vm.shop.name }}
   <small ng-show="vm.shopping_item.mapped_ingredient"> - matching {{ vm.shopping_item.mapped_ingredient.name }}</small>
 </h1>

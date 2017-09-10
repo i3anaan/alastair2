@@ -1,3 +1,4 @@
+<a ui-sref="app.alastair_organizer.event({id: vm.event.id })"><-- Back to {{ vm.event.name }}</a>
 <h1 class="page-header">Shopping list for {{ vm.event.name }} </h1>
 
 <div class="row m-b-20">
@@ -27,7 +28,7 @@
   </div>
 </div>
 
-<div class="table-responsive">
+<div class="table-responsive" ng-show="vm.data.length">
   <table class="table">
     <thead>
       <tr>
@@ -52,10 +53,10 @@
 
         <td>
           {{ ingredient.calculated_quantity }}{{ ingredient.ingredient.default_measurement.display_code }}
-          <button type="button" class="btn btn-link" ng-show="detailed_view" ng-click="vm.showDistribution(ingredient)">Show distibution</button>
+          <button type="button" class="btn btn-link" ng-show="detailed_view" ng-click="vm.showDistribution(ingredient)">Show distribution</button>
         </td>
         <td>
-          {{ ingredient.chosen_item.item_buying_quantity  }}{{ ingredient.ingredient.default_measurement.display_code }} 
+          {{ ingredient.chosen_item.item_buying_quantity }}{{ ingredient.ingredient.default_measurement.display_code }} 
           <span ng-show="detailed_view">({{ ingredient.chosen_item.item_count }} items)</span>
         </td>
         <td>{{ ingredient.chosen_price | number:2 }}{{ vm.event.shop.currency.display_code }}</td>
@@ -75,7 +76,13 @@
   </table>
 </div>
 
-
+<p ng-show="!vm.data.length && !vm.busy" class="alert alert-warning">
+  No shopping items to show. 
+  <span ng-show="vm.event.shop && vm.unmapped.length">The store you selected doesn't have any of the ingredients you need. Maybe the <a ui-sref="app.alastair_shopping.items({id: vm.event.shop.id})">matching</a> is incomplete? </span>
+  <span ng-show="!vm.event.shop">It seems you haven't selected a shop in the <a ui-sref="app.alastair_organizer.event({id: vm.event.id})">event view</a>, you might want to do that.</span>
+  <span ng-show="!vm.unmapped.length">Make sure you added a meal with a recipe in the <a ui-sref="app.alastair_organizer.event({id: vm.event.id})">event view</a> as you have no needed recipes at all in this event.</span>
+</p>
+<p ng-show="vm.busy">Generating shopping list...</p>
 
 <!-- ########################### Unmapped Ingredient modal ###################### -->
 <div class="modal fade" id="unmappedModal">

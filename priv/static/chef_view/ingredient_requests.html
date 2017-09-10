@@ -1,3 +1,4 @@
+<a ui-sref="app.alastair_chef.ingredients"><-- Back to ingredients</a>
 <h1 class="page-header">Ingredient Requests</h1>
 
 <div class="alert alert-info" ng-show="vm.permissions.superuser">You are a alastair-admin, so you can see ingredient requests from non-admins here. Please try to approve or reject them as timely as possible</div>
@@ -55,12 +56,12 @@
         <div class="modal-body">
           <div class="form-group m-b-20">
             <label for="name">Name*</label>
-            <input type="text" class="form-control" ng-model="vm.edited_request.name" required />
+            <input type="text" class="form-control" ng-model="vm.edited_request.name" required placeholder="Enter the name of the missing ingredient" />
             <p class="label label-danger" ng-show="vm.errors.name">{{ vm.errors.name }}</p>
           </div>
           <div class="form-group m-b-20">
             <label for="name">Description</label>
-            <input type="text" class="form-control" ng-model="vm.edited_request.description" />
+            <input type="text" class="form-control" ng-model="vm.edited_request.description" placeholder="If there is something to tell about the ingredient, do it here" />
             <p class="label label-danger" ng-show="vm.errors.description">{{ vm.errors.description }}</p>
           </div>
           <div class="form-group m-b-20">
@@ -69,9 +70,9 @@
             <p class="label label-danger" ng-show="vm.errors.default_measurement_id">{{ vm.errors.default_measurement_id }}</p>
           </div>
           <div class="form-group m-b-20">
-          <label for="name">Reason</label>
+          <label for="name">Additional notes to alastair admin</label>
             <input type="text" class="form-control" ng-model="vm.edited_request.request_message" />
-            <p class="label label-danger" ng-show="vm.errors.description">{{ vm.errors.description }}</p>
+            <p class="label label-danger" ng-show="vm.errors.description">{{ vm.errors.request_message }}</p>
           </div>
         </div>
         <div class="modal-footer">

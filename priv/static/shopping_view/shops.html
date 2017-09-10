@@ -60,12 +60,12 @@
                 <div class="modal-body">
                     <div class="form-group m-b-20">
                         <label for="name">Name*</label>
-                        <input type="text" class="form-control" ng-model="vm.edited_shop.name" required />
+                        <input type="text" class="form-control" ng-model="vm.edited_shop.name" required placeholder="What is written on the shop that you want to add? E.g. 'Lidl'" />
                         <p class="label label-danger" ng-show="vm.errors.name">{{ vm.errors.name }}</p>
                     </div>
                     <div class="form-group m-b-20">
-                        <label for="name">Location</label>
-                        <input type="text" class="form-control" ng-model="vm.edited_shop.location" />
+                        <label for="name">Location*</label>
+                        <input type="text" class="form-control" ng-model="vm.edited_shop.location" placeholder="Where can you find that shop? Please give an address or something to enter in Google Maps!" />
                         <p class="label label-danger" ng-show="vm.errors.location">{{ vm.errors.location }}</p>
                     </div>
                     <div class="form-group m-b-20">
@@ -76,7 +76,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
-                    <button type="submit" ng-disabled="bodyForm.$pristine || bodyForm.$invalid" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Save </button>
+                    <button type="submit" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Save </button>
                 </div>
             </form>
             <p ng-show="!vm.edited_shop.permissions.shop_admin">

@@ -19,7 +19,7 @@ defmodule Alastair.IngredientRequest do
   def changeset(struct, params \\ %{}) do
     struct
     |> cast(params, [:name, :description, :requested_by, :request_message, :default_measurement_id, :admin_message, :approval_state])
-    |> validate_required([:name, :description, :requested_by, :default_measurement_id])
+    |> validate_required([:name, :requested_by, :default_measurement_id])
     |> foreign_key_constraint(:default_measurement_id)
     |> validate_not_reapproved
   end

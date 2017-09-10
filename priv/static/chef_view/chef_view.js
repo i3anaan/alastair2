@@ -381,8 +381,8 @@
 
     vm.addToMeal = function() {
       $.gritter.add({
-        title: 'Not yet implemented',
-        text: 'Go beat up the developers for being lazy',
+        title: 'Developer-lazy-error',
+        text: 'In this version you still have to use the organizers view to add a recipe to a meal',
         sticky: false,
         time: 8000,
         class_name: 'my-sticky-class',

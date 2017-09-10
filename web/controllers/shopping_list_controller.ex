@@ -80,7 +80,6 @@ defmodule Alastair.ShoppingListController do
           |> Map.update(:used_in_meals, [], fn(x) -> Enum.concat(x, ri.used_in_meals) end)
         end)
       end)
-    |> IO.inspect
 
 
     # On empty map we are done

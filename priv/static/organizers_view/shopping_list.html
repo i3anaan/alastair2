@@ -1,9 +1,31 @@
 <h1 class="page-header">Shopping list for {{ vm.event.name }} </h1>
 
-<button type="button" class="btn btn-primary" ng-click="detailed_view = !detailed_view"><span ng-show="detailed_view">Simple View</span><span ng-show="!detailed_view">Detailed View</span></button>
-<button type="button" class="btn btn-warning" ng-show="vm.unmapped && vm.unmapped.length>0" ng-click="vm.showUnmapped()"><i class="fa fa-exclamation-triangle"></i> Not all ingredients are available in the store!</button>
-<button type="button" class="btn btn-info" ng-click="vm.makeCsv(vm.data);"><i class="fa fa-download"></i> Download as .csv</button>
+<div class="row m-b-20">
+  <button type="button" class="btn btn-primary" ng-click="detailed_view = !detailed_view"><span ng-show="detailed_view">Simple View</span><span ng-show="!detailed_view">Detailed View</span></button>
+  <button type="button" class="btn btn-warning" ng-show="vm.unmapped && vm.unmapped.length>0" ng-click="vm.showUnmapped()"><i class="fa fa-exclamation-triangle"></i> Not all ingredients are available in the store!</button>
+  <button type="button" class="btn btn-info" ng-click="vm.makeCsv(vm.data);"><i class="fa fa-download"></i> Download as .csv</button>
+</div>
 
+<div class="row" ng-show="detailed_view">
+  <div class="form-group col-lg-6">
+    <label>Show from</label>
+    <div class="input-group">
+      <input type="text" class="form-control" datepicker-popup ng-model="vm.date_from" is-open="_picker1_opened" datepicker-options="vm.edited_meal.date_options" ng-required="true" close-text="Close" ng-change="vm.loadList()" />
+      <span class="input-group-btn">
+        <button type="button" class="btn btn-default" ng-click="_picker1_opened=!_picker1_opened;"><i class="fa fa-calendar"></i></button>
+      </span>
+    </div>
+  </div>
+  <div class="form-group col-lg-6">
+    <label>Until</label>
+    <div class="input-group">
+      <input type="text" class="form-control" datepicker-popup ng-model="vm.date_to" is-open="_picker2_opened" datepicker-options="vm.date_options" ng-required="true" close-text="Close" ng-change="vm.loadList()" />
+      <span class="input-group-btn">
+        <button type="button" class="btn btn-default" ng-click="_picker2_opened=!_picker2_opened;"><i class="fa fa-calendar"></i></button>
+      </span>
+    </div>
+  </div>
+</div>
 
 <div class="table-responsive">
   <table class="table">
@@ -85,6 +107,7 @@
 
             
             <div class="modal-footer">
+                <button type="button" class="btn btn-info" ng-click="vm.makeCsv(vm.unmapped);"><i class="fa fa-download"></i> Download as .csv</button>
                 <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
             </div>
         </div>

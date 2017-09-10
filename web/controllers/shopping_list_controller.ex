@@ -21,13 +21,28 @@ defmodule Alastair.ShoppingListController do
     end
   end
 
-  def shopping_list(conn, %{"event_id" => event_id}) do
+  defp filter_time(query, params) do
+    query = if params["from"] do
+      from(p in query, where: p.date >= ^params["from"])
+    else
+      query
+    end
+    if params["to"] do
+      from(p in query, where: p.date <= ^params["to"])
+    else
+      query
+    end
+  end
+
+  def shopping_list(conn, params) do
+    event_id = params["event_id"]
     event = Alastair.EventController.get_event(event_id)
 
     # Fetch all the meals including everything down to their ingredients from db
     meals = from(p in Meal, 
       where: p.event_id == ^event_id,
       preload: [{:meals_recipes, [{:recipe, [{:recipes_ingredients, [{:ingredient, [:default_measurement]}]}]}]}]) # lol
+    |> filter_time(params)
     |> Repo.all
 
 

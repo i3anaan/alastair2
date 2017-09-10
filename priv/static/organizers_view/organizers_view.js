@@ -314,17 +314,27 @@
         showError(error);
       });
     }
-
+    var raceCounter = 0;
     vm.loadList = function(callback) {
+      raceCounter++;
+      const localCounter = raceCounter;
+      var params = {};
+      if(vm.date_from)
+        params.from = vm.date_from;
+      if(vm.date_to)
+        params.to = vm.date_to;
       return $http({
         url: apiUrl + '/events/' + $stateParams.id + '/shopping_list',
-        method: 'GET'
+        method: 'GET',
+        params: params
       }).then(function(response) {
-        vm.data = response.data.data.mapped;
-        vm.unmapped = response.data.data.unmapped;
-        vm.accumulates = response.data.data.accumulates;
-        if(callback)
-          callback();
+        if(localCounter == raceCounter) {
+          vm.data = response.data.data.mapped;
+          vm.unmapped = response.data.data.unmapped;
+          vm.accumulates = response.data.data.accumulates;
+          if(callback)
+            callback();
+        }
       }).catch(function(error) {
         showError(error);
       });

@@ -46,19 +46,41 @@ defmodule Alastair.ShoppingListController do
     |> Repo.all
 
 
-    
-    # Map the meals down to recipes_ingredients
-    ingredients = meals 
-    |> Enum.reduce([], fn(x, acc) -> Enum.concat(acc, x.meals_recipes) end)           # Reduce to meals_recipes
-    |> Enum.map(fn(x) -> 
-      x.recipe
-      |> Map.put(:real_person_count, x.person_count)                                  # Carry the person count into the recipe_ingredient
-      |> multiply_person_count                                                        # Multiply the person count into the recipe_ingredient
-    end)   
-    |> Enum.reduce([], fn(x, acc) -> Enum.concat(acc, x.recipes_ingredients) end)     # Join the recipes_ingredients into one big list, discard all meal-related information
-    |> Enum.reduce(%{}, fn(ri, acc) -> Map.update(acc, ri.ingredient_id, ri,          # Update the map to either start with the current value
-      fn(old) -> Map.update(old, :real_quantity, 0, fn(x) -> x + ri.real_quantity end) end) # Or, when the key is already present, to update that ri's real quantity
+    # Map-reduce our way down (maybe think of parallel processing?)
+    # First update the recipes ingredients to hold the quantity
+    # Then reduce it into a map ingredient-id => recipe_ingredient
+    ingredients = meals
+    |> Enum.map(fn(meal) ->
+      meals_recipes = Enum.map(meal.meals_recipes, fn(meal_recipe) -> 
+        # This is the factor by which the meal has more persons than the recipe
+        factor = meal_recipe.person_count / meal_recipe.recipe.person_count
+        # Calculate the real quantity that we need by multiplying each quantity with the person factor
+        # We assume that ingredient usage rises linearily with person count
+        # Also carry the person count into the recipe
+        recipes_ingredients = Enum.map(meal_recipe.recipe.recipes_ingredients, fn(recipe_ingredient) ->
+          meal = Map.take(meal, [:id, :name, :date, :time]) |> Map.put(:quantity, recipe_ingredient.quantity*factor)
+          
+          recipe_ingredient
+          |> Map.put(:real_quantity, recipe_ingredient.quantity*factor)
+          |> Map.put(:used_in_meals, [meal])
+        end)
+
+        # Update original structure
+        Map.put(meal_recipe, :recipe, Map.put(meal_recipe.recipe, :recipes_ingredients, recipes_ingredients))
+      end)
+      Map.put(meal, :meals_recipes, meals_recipes)
     end)
+    |> Enum.reduce([], fn(x, acc) -> Enum.concat(acc, x.meals_recipes) end)                 # Reduce to meals_recipes
+    |> Enum.reduce([], fn(x, acc) -> Enum.concat(acc, x.recipe.recipes_ingredients) end)    # Join the recipes_ingredients into one big list, discard all meal-related information
+    |> Enum.reduce(%{}, fn(ri, acc) ->                                                      # Update the map to either start with the current ri or update stuff
+      Map.update(acc, ri.ingredient_id, ri, fn(old_ri) ->
+          old_ri 
+          |> Map.update(:real_quantity, 0, fn(x) -> x + ri.real_quantity end)
+          |> Map.update(:used_in_meals, [], fn(x) -> Enum.concat(x, ri.used_in_meals) end)
+        end)
+      end)
+    |> IO.inspect
+
 
     # On empty map we are done
     if Enum.empty?(Map.keys(ingredients)) do

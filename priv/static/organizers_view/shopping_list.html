@@ -50,7 +50,10 @@
           <button type="button" class="btn btn-link" ng-show="detailed_view && ingredient.items.length > 1" ng-click="vm.showAlternatives(ingredient)">Show alternatives</button>
         </td>
 
-        <td>{{ ingredient.calculated_quantity }}{{ ingredient.ingredient.default_measurement.display_code }}</td>
+        <td>
+          {{ ingredient.calculated_quantity }}{{ ingredient.ingredient.default_measurement.display_code }}
+          <button type="button" class="btn btn-link" ng-show="detailed_view" ng-click="vm.showDistribution(ingredient)">Show distibution</button>
+        </td>
         <td>
           {{ ingredient.chosen_item.item_buying_quantity  }}{{ ingredient.ingredient.default_measurement.display_code }} 
           <span ng-show="detailed_view">({{ ingredient.chosen_item.item_count }} items)</span>
@@ -139,11 +142,49 @@
                     <td>
                       {{ item.shopping_item.name }} 
                     </td>
-                    <td>{{ item.item_buying_quantity  }}{{ vm.alt_ingredient.ingredient.default_measurement.display_code }} ({{ item.item_count }} items)
+                    <td>{{ item.item_buying_quantity  }}{{ vm.alt_ingredient.ingredient.default_measurement.display_code }} ({{ item.item_count }} items)</td>
                     <td>{{ item.item_price | number:2 }}{{ vm.event.shop.currency.display_code }}</td>
                     <td>
                       <button type="button" class="btn btn-sm btn-primary" ng-click="vm.chooseAltItem(item)"><i class="fa fa-check-circle"></i> Choose</button>
                     </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ########################### Amount distribution modal ###################### -->
+<div class="modal fade" id="amountDistributionModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Amount distribution for {{vm.alt_ingredient.ingredient.name}}</h4>
+            </div>
+            <h6>Needed: {{ vm.alt_ingredient.calculated_quantity }}{{ vm.alt_ingredient.ingredient.default_measurement.display_code }}</td>
+
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Meal name</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Quantity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="meal in vm.alt_ingredient.used_in_meals">
+                    <td><a href="javascript:;" ng-click="vm.goToMeal(meal)">{{ meal.name }}</a></td>
+                    <td>{{ meal.date | date:'EEE d.M' }}</td>
+                    <td>{{ meal.time | date:'hh:mm'}}</td>
+                    <td>{{ meal.quantity }} {{ vm.alt_ingredient.ingredient.default_measurement.display_code }}</td>
                   </tr>
                 </tbody>
               </table>

@@ -300,7 +300,7 @@
     vm.loadMeals();
   }
 
-  function ShoppingListController($http, $stateParams) {
+  function ShoppingListController($http, $stateParams, $state) {
     var vm = this;
     vm.data = [];
 
@@ -338,6 +338,16 @@
       }).catch(function(error) {
         showError(error);
       });
+    }
+
+    vm.showDistribution = function(ingredient) {
+      vm.alt_ingredient = ingredient;
+      $('#amountDistributionModal').modal('show');
+    }
+
+    vm.goToMeal = function(meal) {
+      $('#amountDistributionModal').modal('hide');
+      $state.go('app.alastair_organizer.meal', {meal_id: meal.id, event_id: vm.event.id});
     }
 
     vm.showAlternatives = function(ingredient) {

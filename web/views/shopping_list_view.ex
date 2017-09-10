@@ -26,7 +26,8 @@ defmodule Alastair.ShoppingListView do
       note: render_assoc_one(ri.note, Alastair.ShoppingListView, "note.json"),
       calculated_quantity: ri.real_quantity,
       best_price: ri.best_price,
-      chosen_price: ri.chosen_item.item_price
+      chosen_price: ri.chosen_item.item_price,
+      used_in_meals: ri.used_in_meals
     }
   end
 

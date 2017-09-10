@@ -7,7 +7,7 @@ defmodule Alastair.IngredientRequest do
     field :requested_by, :string
     field :admin_message, :string
     field :request_message, :string
-    belongs_to :default_measurement, Alastair.DefaultMeasurement
+    belongs_to :default_measurement, Alastair.Measurement
     field :approval_state, ApprovalStateEnum, default: :requesting
 
     timestamps()

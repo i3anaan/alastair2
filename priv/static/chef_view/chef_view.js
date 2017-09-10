@@ -159,6 +159,19 @@
           }
         }
       })
+      .state('app.alastair_chef.ingredient_requests', {
+        url: '/ingredient_requests',
+        data: { pageTitle: 'Alastair Ingredient Request' },
+        params: {
+          id: null
+        },
+        views: {
+          'pageContent@app': {
+            templateUrl: `${baseUrl}static/chef_view/ingredient_requests.html`,
+            controller: 'RequestsController as vm'
+          }
+        }
+      })
   }
 
 
@@ -570,6 +583,87 @@
     vm.loadPermissions();
   }
 
+  function RequestsController($http, $stateParams) {
+    var vm = this;
+
+    vm.permissions = {
+      superadmin: false
+    }
+
+    vm.loadPermissions = function() {
+      return $http({
+        url: apiUrl + '/user',
+        method: 'GET'
+      }).then(function(response) {
+        vm.permissions.superuser = response.data.data.superadmin;
+      }).catch(function(error) {
+        showError();
+      });
+    }
+
+    vm.newRequest = function() {
+      $('#requestModal').modal('show');
+      vm.edited_request = {};
+      vm.errors = {};
+    }
+
+    vm.submitForm = function() {
+      $http({
+        url: apiUrl + 'ingredient_requests',
+        method: 'POST',
+        data: {
+          ingredient_request: vm.edited_request
+        }
+      }).then(function(response) {
+        $('#requestModal').modal('hide');
+        vm.showRequest(response.data.data.id);
+        vm.resetData();
+        showSuccess('Request recorded');          
+      }).catch(function(error) {
+        if(error.status == 422)
+          vm.errors = error.data.errors;
+        else
+          showError(error);
+      });
+    }
+
+    vm.showRequest = function(id) {
+      $http({
+        url: apiUrl + 'ingredient_requests/' + id,
+        method: 'GET'
+      }).then((response) => {
+        vm.show_request = response.data.data;
+        $('#showRequestModal').modal('show');
+      }).catch((error) => {
+        showError(error);
+      });
+    }
+
+    vm.review_request = function(approval_state, admin_message, request) {
+      request.approval_state = approval_state;
+      request.admin_message = admin_message;
+      $http({
+        url: apiUrl + 'ingredient_requests/' + request.id,
+        method: 'PUT',
+        data: {
+          ingredient_request: request
+        }
+      }).then((response) => {
+        $('#showRequestModal').modal('hide');
+        vm.resetData();
+      }).catch((error) => {
+        showError(error);
+      });
+    }
+
+    if($stateParams.id) {
+      showRequest(id);
+    }
+    infiniteScroll($http, vm, apiUrl + 'ingredient_requests');
+    loadMeasurements($http, vm);
+    vm.loadPermissions();
+  }
+
   function StarRatingDirective() {
     function link(scope) {
       scope.range = function(items) {
@@ -602,6 +696,7 @@
     .controller('SingleRecipeController', SingleRecipeController)
     .controller('MyRecipesController', MyRecipesController)
     .controller('AdminsController', AdminsController)
+    .controller('RequestsController', RequestsController)
     .directive('omsStarRating', StarRatingDirective);
 })();
 

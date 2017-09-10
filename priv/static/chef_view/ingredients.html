@@ -8,8 +8,12 @@
 		</div>
 	</div>
 	<div class="col-lg-6" ng-if="vm.permissions.superuser">
-		<button class="btn btn-success" ng-click="vm.newIngredient()"><i class="fa fa-plus"></i>&nbsp;New</button>
+		<button class="btn btn-success" ng-click="vm.newIngredient()"><i class="fa fa-plus"></i> New</button>
+        <a class="btn btn-info" ui-sref="app.alastair_chef.ingredient_requests"><i class="fa fa-question"></i> View Requests</a>
 	</div>
+    <div class="col-lg-6" ng-if="!vm.permissions.superuser">
+        <a class="btn btn-info" ui-sref="app.alastair_chef.ingredient_requests"><i class="fa fa-question"></i> Request missing ingredient</a>
+    </div>
 </div>
 
 <div class="row" infinite-scroll="vm.loadNextPage()" infinite-scroll-disabled="vm.block_infinite_scroll" infinite-scroll-distance="1">

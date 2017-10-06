@@ -15,5 +15,5 @@ before_script:
 
 
 script:
-    - sh oms.sh run -e MIX_ENV="test" alastair mix test
+    - sudo docker-compose run -e MIX_ENV="test" alastair mix test
 

@@ -16,5 +16,6 @@ config :alastair, Alastair.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   password: "postgres",
-  database: "alastair_prod",
+  database: "alastair",
+  hostname: "postgres-alastair",
   pool_size: 20

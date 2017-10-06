@@ -20,6 +20,8 @@ services:
             - "traefik.enable=true"
             - "registry.modules=/static/getModules.json"
             - "registry.status=/status"
+        environment:
+            - MIX_ENV=prod
 
     postgres-alastair:
         image: postgres:latest

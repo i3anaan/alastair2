@@ -3,6 +3,7 @@
 /doc
 /tmp
 /node_modules
+/priv/static
 
 /installer/_build
 /installer/tmp

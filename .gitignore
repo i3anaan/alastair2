@@ -4,6 +4,7 @@
 /tmp
 /node_modules
 /priv/static
+/cover
 
 /installer/_build
 /installer/tmp

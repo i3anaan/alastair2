@@ -24,7 +24,7 @@ o Searching in multiple fields
 o Request to check if ingredient was already matched in the store
 x Shopping list unmatched ingredients
 x Shopping list ticked items and chosen mappings
-o Shopping list limit view to some days
+x Shopping list limit view to some days
 
 Frontend
 x Serve static files on /static

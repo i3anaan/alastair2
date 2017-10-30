@@ -48,15 +48,15 @@ defmodule Alastair.UserService do
 
         Plug.Conn.assign(conn, :user, user)
       _ -> 
-        response |> IO.inspect
         conn
         |> Plug.Conn.put_status(:internal_server_error)
-        |> render(Alastair.ErrorView, "error.json", message: "Could not parse core response for user data")
+        |> render(Alastair.ErrorView, "error.json", message: "Could not parse core response for user data", data: response)
     end
   end
 
   # HTTPoison returns :ok even on non-2xx status code, so we have to check ourselves
-  defp check_error(conn, response) do
+  # TODO find out how to test private methods and make this private again
+  def check_error(conn, response) do
     case response.status_code do
       200 -> parse_oms_user(conn, response)
       401 ->         

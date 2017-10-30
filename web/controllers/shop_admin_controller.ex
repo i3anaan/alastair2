@@ -11,7 +11,9 @@ defmodule Alastair.ShopAdminController do
     Plug.Conn.assign(conn, :shop_admin, found != [])
   end
 
-  def own_user(conn, _params) do
+  def own_user(conn, %{"shop_id" => shop_id}) do
+    conn = fetch_shop_role(conn, shop_id)
+
     user = conn.assigns.user
     |> Map.put(:shop_admin, conn.assigns.user.superadmin || conn.assigns.shop_admin)
 

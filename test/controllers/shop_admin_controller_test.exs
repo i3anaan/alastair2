@@ -157,4 +157,37 @@ defmodule Alastair.ShopAdminControllerTest do
     conn = delete conn, shop_shop_admin_path(conn, :delete, shop, shop_admin)
     assert response(conn, 403)
   end
+
+  test "returns own user-role for shopadmins", %{conn: conn} do
+    %{:euro => euro} = Alastair.Seeds.CurrencySeed.run
+    shop = Repo.insert! %Shop{
+      name: "some content",
+      location: "some content",
+      currency: euro
+    }
+
+
+    Repo.insert! %ShopAdmin{
+      user_id: "asd123",
+      shop_id: shop.id
+    }
+
+    conn = put_req_header(conn, "x-auth-token", "nonadmin")
+    conn = get conn, shop_shop_admin_path(conn, :own_user, shop)
+    assert json_response(conn, 200)["data"]["shop_admin"]
+  end
+
+  test "returns own user-role for non-shopadmins", %{conn: conn} do
+    %{:euro => euro} = Alastair.Seeds.CurrencySeed.run
+    shop = Repo.insert! %Shop{
+      name: "some content",
+      location: "some content",
+      currency: euro
+    }
+
+    conn = put_req_header(conn, "x-auth-token", "nonadmin")
+    conn = get conn, shop_shop_admin_path(conn, :own_user, shop)
+    refute json_response(conn, 200)["data"]["shop_admin"]
+  end
+
 end

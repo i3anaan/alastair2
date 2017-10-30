@@ -17,7 +17,9 @@ defmodule Alastair.Mixfile do
 
   # Configure coverex to ignore all phoenix generated files and unnecessary things
   def coverex do
-    [tool: Coverex.Task, ignore_modules: [
+    [tool: Coverex.Task,
+    coveralls: true,
+    ignore_modules: [
       Elixir.Alastair,
       Elixir.Alastair.Router.Helpers,
       Elixir.Alastair.Router, 

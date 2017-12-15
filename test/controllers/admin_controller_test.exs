@@ -17,8 +17,8 @@ defmodule Alastair.AdminControllerTest do
   test "shows chosen resource", %{conn: conn} do
     admin = Repo.insert! %Admin{}
     conn = get conn, admin_path(conn, :show, admin)
-    assert json_response(conn, 200)["data"] == %{"id" => admin.id,
-      "user_id" => admin.user_id}
+    assert json_response(conn, 200)["data"] |> map_inclusion(%{"id" => admin.id,
+      "user_id" => admin.user_id})
   end
 
   test "renders page not found when id is nonexistent", %{conn: conn} do
@@ -31,6 +31,14 @@ defmodule Alastair.AdminControllerTest do
     conn = post conn, admin_path(conn, :create), admin: @valid_attrs
     assert json_response(conn, 201)["data"]["id"]
     assert Repo.get_by(Admin, @valid_attrs)
+  end
+
+  test "does not insert a duplicate admin", %{conn: conn} do
+    conn = post conn, admin_path(conn, :create), admin: @valid_attrs
+    assert json_response(conn, 201)["data"]["id"]
+    assert Repo.get_by(Admin, @valid_attrs)
+    conn = post conn, admin_path(conn, :create), admin: @valid_attrs
+    assert json_response(conn, 422)
   end
 
   test "does not create resource and renders errors when data is invalid", %{conn: conn} do

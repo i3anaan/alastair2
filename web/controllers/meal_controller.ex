@@ -5,7 +5,10 @@ defmodule Alastair.MealController do
   alias Alastair.MealRecipe
 
   def index(conn, %{"event_id" => event_id}) do
-    meals = from(p in Meal, where: p.event_id == ^event_id) |> Repo.all
+    meals = from(p in Meal, 
+      where: p.event_id == ^event_id,
+      preload: [{:meals_recipes, [:recipe]}])
+    |> Repo.all
 
     render(conn, "index.json", meals: meals)
   end

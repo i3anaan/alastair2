@@ -187,7 +187,8 @@
     vm.newMeal = function() {
       $('#mealModal').modal('show');
       vm.edited_meal = {
-        meals_recipes: []
+        meals_recipes: [],
+        picked_time: new Date()
       };
       vm.errors = undefined;
       $scope.$broadcast('angucomplete-alt:clearInput', 'recipeAutocomplete');
@@ -205,7 +206,11 @@
         vm.edited_meal.date_options = {
           minDate: null,
           maxDate: null
-        }
+        };
+        if(vm.edited_meal.time)
+          vm.edited_meal.picked_time = new Date('2017-09-10T' + vm.edited_meal.time);
+        else
+          vm.edited_meal.picked_time = new Date();
       }).catch(function(error) {
         showError(error);
       });
@@ -225,12 +230,23 @@
     }
 
     vm.addRecipe = function(recipe) {
-      vm.edited_meal.meals_recipes.push({
-        person_count: 1,
-        recipe_id: recipe.originalObject.id,
-        recipe: recipe.originalObject
-      });
-      $scope.$broadcast('angucomplete-alt:clearInput', 'recipeAutocomplete');
+      if(recipe) {
+          vm.edited_meal.meals_recipes.push({
+          person_count: 1,
+          recipe_id: recipe.originalObject.id,
+          recipe: recipe.originalObject
+        });
+        $scope.$broadcast('angucomplete-alt:clearInput', 'recipesAutocomplete');
+      } else {
+        $.gritter.add({
+          title: 'That\'s not how it works',
+          text: 'You have to select a recipe that you want to add',
+          sticky: false,
+          time: 8000,
+          class_name: 'my-sticky-class',
+        });
+      }
+
     }
 
     vm.fetchRecipes = function(query, timeout) {
@@ -263,6 +279,8 @@
     vm.submitForm = function() {
       // If it has an id POST, otherwise PUT
       var promise;
+      var time = new Date(vm.edited_meal.picked_time);
+      vm.edited_meal.time = ("0" + time.getHours()).slice(-2) + ':' +  ("0" + time.getMinutes()).slice(-2) + ':00';
       if(vm.edited_meal.id) {
         promise = $http({
           url: apiUrl + '/events/' + $stateParams.id + '/meals/' + vm.edited_meal.id,
@@ -300,7 +318,7 @@
     vm.loadMeals();
   }
 
-  function ShoppingListController($http, $stateParams) {
+  function ShoppingListController($http, $stateParams, $state) {
     var vm = this;
     vm.data = [];
 
@@ -314,20 +332,43 @@
         showError(error);
       });
     }
-
+    
+    var raceCounter = 0;
     vm.loadList = function(callback) {
+      vm.busy = true;
+      raceCounter++;
+      const localCounter = raceCounter;
+      var params = {};
+      if(vm.date_from)
+        params.from = vm.date_from;
+      if(vm.date_to)
+        params.to = vm.date_to;
       return $http({
         url: apiUrl + '/events/' + $stateParams.id + '/shopping_list',
-        method: 'GET'
+        method: 'GET',
+        params: params
       }).then(function(response) {
-        vm.data = response.data.data.mapped;
-        vm.unmapped = response.data.data.unmapped;
-        vm.accumulates = response.data.data.accumulates;
-        if(callback)
-          callback();
+        if(localCounter == raceCounter) {
+          vm.busy = false;
+          vm.data = response.data.data.mapped;
+          vm.unmapped = response.data.data.unmapped;
+          vm.accumulates = response.data.data.accumulates;
+          if(callback)
+            callback();
+        }
       }).catch(function(error) {
         showError(error);
       });
+    }
+
+    vm.showDistribution = function(ingredient) {
+      vm.alt_ingredient = ingredient;
+      $('#amountDistributionModal').modal('show');
+    }
+
+    vm.goToMeal = function(meal) {
+      $('#amountDistributionModal').modal('hide');
+      $state.go('app.alastair_organizer.meal', {meal_id: meal.id, event_id: vm.event.id});
     }
 
     vm.showAlternatives = function(ingredient) {

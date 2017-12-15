@@ -10,7 +10,37 @@ defmodule Alastair.Mixfile do
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
      aliases: aliases(),
-     deps: deps()]
+     deps: deps(),
+     test_coverage: coverex()
+   ]
+  end
+
+  # Configure coverex to ignore all phoenix generated files and unnecessary things
+  def coverex do
+    [tool: Coverex.Task,
+    coveralls: true,
+    ignore_modules: [
+      Elixir.Alastair,
+      Elixir.Alastair.Router.Helpers,
+      Elixir.Alastair.Router, 
+      Elixir.Alastair.Repo, 
+      Elixir.Alastair.Seeds,
+      Elixir.Alastair.Seeds.CurrencySeed,
+      Elixir.Alastair.Seeds.ExampleSeed,
+      Elixir.Alastair.Seeds.IngredientSeed,
+      Elixir.Alastair.Seeds.MeasurementSeed,
+      Elixir.Phoenix.Param.Alastair.Event,
+      Elixir.Poison.Encoder.Alastair.Notification,
+      Elixir.Alastair.Web,
+      Elixir.Alastair.ChannelCase,
+      Elixir.Alastair.ConnCase,
+      Elixir.Alastair.ModelCase,
+      Elixir.Alastair.Gettext,
+      Elixir.Alastair.ChangesetView,
+      Elixir.Alastair.ErrorView,
+      Elixir.Alastair.ErrorHelpers,
+      Elixir.Alastair.Endpoint
+    ]]
   end
 
   # Configuration for the OTP application.
@@ -39,7 +69,8 @@ defmodule Alastair.Mixfile do
      {:gettext, "~> 0.11"},
      {:cowboy, "~> 1.0"},
      {:ecto_enum, "~> 1.0"},
-     {:httpoison, "~> 0.13"}
+     {:httpoison, "~> 0.13"},
+     {:coverex, "~> 1.4.10"}
    ]
   end
 

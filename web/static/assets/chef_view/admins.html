@@ -5,6 +5,17 @@
 You are a superadmin! Additionally to the here shown admins, also super_admins in oms-core do have admin permissions.
 </p>
 
+<p class="alert alert-info" ng-show="vm.me && !vm.me.active">
+You are a superadmin, but you disabled your permissions. This is recommended for everydays use as you can not accidentally delete something then. To enable, click the button
+</p>
+
+<p class="alert alert-info" ng-show="vm.me && vm.me.active">
+Please remember to switch off admin mode when you don't need it!
+</p>
+
+<button type="button" class="btn btn-danger" ng-click="vm.setAdminEnabled(true)" ng-show="vm.me && !vm.me.active">Enable Admin Mode</button>
+<button type="button" class="btn btn-primary" ng-click="vm.setAdminEnabled(false)" ng-show="vm.me && vm.me.active">Disable Admin Mode</button>
+
 <div class="table-responsive">
   <table class="table">
     <thead>

@@ -1,10 +1,11 @@
-FROM elixir:1.5.1-alpine
+FROM elixir:alpine
 
 RUN mkdir -p /usr/src/myapp \
 	&& mkdir -p /usr/src/scripts \
 	&& mix local.hex --force \
   && mix local.rebar --force \
-	&& apk add --update --no-cache nodejs nodejs-npm
+	&& apk add --update --no-cache nodejs nodejs-npm \
+  && npm install -g brunch
 
 ADD bootstrap.sh /usr/src/scripts/bootstrap.sh
 ADD wait.sh /usr/src/scripts/wait.sh

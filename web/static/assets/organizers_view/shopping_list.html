@@ -1,11 +1,34 @@
+<a ui-sref="app.alastair_organizer.event({id: vm.event.id })"><-- Back to {{ vm.event.name }}</a>
 <h1 class="page-header">Shopping list for {{ vm.event.name }} </h1>
 
-<button type="button" class="btn btn-primary" ng-click="detailed_view = !detailed_view"><span ng-show="detailed_view">Simple View</span><span ng-show="!detailed_view">Detailed View</span></button>
-<button type="button" class="btn btn-warning" ng-show="vm.unmapped && vm.unmapped.length>0" ng-click="vm.showUnmapped()"><i class="fa fa-exclamation-triangle"></i> Not all ingredients are available in the store!</button>
-<button type="button" class="btn btn-info" ng-click="vm.makeCsv(vm.data);"><i class="fa fa-download"></i> Download as .csv</button>
+<div class="row m-b-20">
+  <button type="button" class="btn btn-primary" ng-click="detailed_view = !detailed_view"><span ng-show="detailed_view">Simple View</span><span ng-show="!detailed_view">Detailed View</span></button>
+  <button type="button" class="btn btn-warning" ng-show="vm.unmapped && vm.unmapped.length>0" ng-click="vm.showUnmapped()"><i class="fa fa-exclamation-triangle"></i> Not all ingredients are available in the store!</button>
+  <button type="button" class="btn btn-info" ng-click="vm.makeCsv(vm.data);"><i class="fa fa-download"></i> Download as .csv</button>
+</div>
 
+<div class="row" ng-show="detailed_view">
+  <div class="form-group col-lg-6">
+    <label>Show from</label>
+    <div class="input-group">
+      <input type="text" class="form-control" datepicker-popup ng-model="vm.date_from" is-open="_picker1_opened" datepicker-options="vm.edited_meal.date_options" ng-required="true" close-text="Close" ng-change="vm.loadList()" />
+      <span class="input-group-btn">
+        <button type="button" class="btn btn-default" ng-click="_picker1_opened=!_picker1_opened;"><i class="fa fa-calendar"></i></button>
+      </span>
+    </div>
+  </div>
+  <div class="form-group col-lg-6">
+    <label>Until</label>
+    <div class="input-group">
+      <input type="text" class="form-control" datepicker-popup ng-model="vm.date_to" is-open="_picker2_opened" datepicker-options="vm.date_options" ng-required="true" close-text="Close" ng-change="vm.loadList()" />
+      <span class="input-group-btn">
+        <button type="button" class="btn btn-default" ng-click="_picker2_opened=!_picker2_opened;"><i class="fa fa-calendar"></i></button>
+      </span>
+    </div>
+  </div>
+</div>
 
-<div class="table-responsive">
+<div class="table-responsive" ng-show="vm.data.length">
   <table class="table">
     <thead>
       <tr>
@@ -28,9 +51,12 @@
           <button type="button" class="btn btn-link" ng-show="detailed_view && ingredient.items.length > 1" ng-click="vm.showAlternatives(ingredient)">Show alternatives</button>
         </td>
 
-        <td>{{ ingredient.calculated_quantity }}{{ ingredient.ingredient.default_measurement.display_code }}</td>
         <td>
-          {{ ingredient.chosen_item.item_buying_quantity  }}{{ ingredient.ingredient.default_measurement.display_code }} 
+          {{ ingredient.calculated_quantity }}{{ ingredient.ingredient.default_measurement.display_code }}
+          <button type="button" class="btn btn-link" ng-show="detailed_view" ng-click="vm.showDistribution(ingredient)">Show distribution</button>
+        </td>
+        <td>
+          {{ ingredient.chosen_item.item_buying_quantity }}{{ ingredient.ingredient.default_measurement.display_code }} 
           <span ng-show="detailed_view">({{ ingredient.chosen_item.item_count }} items)</span>
         </td>
         <td>{{ ingredient.chosen_price | number:2 }}{{ vm.event.shop.currency.display_code }}</td>
@@ -50,7 +76,13 @@
   </table>
 </div>
 
-
+<p ng-show="!vm.data.length && !vm.busy" class="alert alert-warning">
+  No shopping items to show. 
+  <span ng-show="vm.event.shop && vm.unmapped.length">The store you selected doesn't have any of the ingredients you need. Maybe the <a ui-sref="app.alastair_shopping.items({id: vm.event.shop.id})">matching</a> is incomplete? </span>
+  <span ng-show="!vm.event.shop">It seems you haven't selected a shop in the <a ui-sref="app.alastair_organizer.event({id: vm.event.id})">event view</a>, you might want to do that.</span>
+  <span ng-show="!vm.unmapped.length">Make sure you added a meal with a recipe in the <a ui-sref="app.alastair_organizer.event({id: vm.event.id})">event view</a> as you have no needed recipes at all in this event.</span>
+</p>
+<p ng-show="vm.busy">Generating shopping list...</p>
 
 <!-- ########################### Unmapped Ingredient modal ###################### -->
 <div class="modal fade" id="unmappedModal">
@@ -85,6 +117,7 @@
 
             
             <div class="modal-footer">
+                <button type="button" class="btn btn-info" ng-click="vm.makeCsv(vm.unmapped);"><i class="fa fa-download"></i> Download as .csv</button>
                 <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
             </div>
         </div>
@@ -116,11 +149,49 @@
                     <td>
                       {{ item.shopping_item.name }} 
                     </td>
-                    <td>{{ item.item_buying_quantity  }}{{ vm.alt_ingredient.ingredient.default_measurement.display_code }} ({{ item.item_count }} items)
+                    <td>{{ item.item_buying_quantity  }}{{ vm.alt_ingredient.ingredient.default_measurement.display_code }} ({{ item.item_count }} items)</td>
                     <td>{{ item.item_price | number:2 }}{{ vm.event.shop.currency.display_code }}</td>
                     <td>
                       <button type="button" class="btn btn-sm btn-primary" ng-click="vm.chooseAltItem(item)"><i class="fa fa-check-circle"></i> Choose</button>
                     </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+
+            <div class="modal-footer">
+                <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ########################### Amount distribution modal ###################### -->
+<div class="modal fade" id="amountDistributionModal">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+                <h4 class="modal-title">Amount distribution for {{vm.alt_ingredient.ingredient.name}}</h4>
+            </div>
+            <h6>Needed: {{ vm.alt_ingredient.calculated_quantity }}{{ vm.alt_ingredient.ingredient.default_measurement.display_code }}</td>
+
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Meal name</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Quantity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr ng-repeat="meal in vm.alt_ingredient.used_in_meals">
+                    <td><a href="javascript:;" ng-click="vm.goToMeal(meal)">{{ meal.name }}</a></td>
+                    <td>{{ meal.date | date:'EEE d.M' }}</td>
+                    <td>{{ meal.time | date:'hh:mm'}}</td>
+                    <td>{{ meal.quantity }} {{ vm.alt_ingredient.ingredient.default_measurement.display_code }}</td>
                   </tr>
                 </tbody>
               </table>

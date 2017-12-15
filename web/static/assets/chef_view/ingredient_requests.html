@@ -1,0 +1,136 @@
+<a ui-sref="app.alastair_chef.ingredients"><-- Back to ingredients</a>
+<h1 class="page-header">Ingredient Requests</h1>
+
+<div class="alert alert-info" ng-show="vm.permissions.superuser">You are a alastair-admin, so you can see ingredient requests from non-admins here. Please try to approve or reject them as timely as possible</div>
+<div class="alert alert-info" ng-show="!vm.permissions.superuser">You can request missing ingredients to be added to the system here. You can not directly add them yourself as control over ingredients is alastair admins only. Please make sure you don't submit duplicate requests (search existing requests and ingredients first).</div>
+
+<div class="row">
+  <div class="col-lg-6">
+    <div class="input-group">
+      <span class="input-group-addon"><i class="fa fa-search"></i></span>
+      <input class="form-control" type="text" ng-model="vm.search" ng-change="vm.resetData()" placeholder="Search requests">
+    </div>
+  </div>
+  <div class="col-lg-6" ng-if="!vm.permissions.superuser">
+    <button class="btn btn-success" ng-click="vm.newRequest()"><i class="fa fa-plus"></i>&nbsp;Request new ingredient</button>
+  </div>
+</div>
+
+<div class="row" infinite-scroll="vm.loadNextPage()" infinite-scroll-disabled="vm.block_infinite_scroll" infinite-scroll-distance="1">
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Request Date</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="request in vm.data">
+          <td><a href="javascript:void(0);" ng-click="vm.showRequest(request.id)">{{ request.name }}</a></td>
+          <td>{{ request.inserted_at | date:"d.M.yy" }}</td>
+          <td>{{ request.approval_state }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div ng-show="vm.data.length === 0 && !vm.busy">
+    <p>No requests in database with the current search</p>
+  </div>
+  <div ng-show="vm.busy">
+    <p>Searching...</p>
+  </div>
+</div>
+
+<!-- ########################### request modal ###################### -->
+<div class="modal fade" id="requestModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Request an ingredient</h4>
+      </div>
+      <form name="requestForm" ng-submit="vm.submitForm()" class="margin-bottom-0" novalidate>
+        <div class="modal-body">
+          <div class="form-group m-b-20">
+            <label for="name">Name*</label>
+            <input type="text" class="form-control" ng-model="vm.edited_request.name" required placeholder="Enter the name of the missing ingredient" />
+            <p class="label label-danger" ng-show="vm.errors.name">{{ vm.errors.name }}</p>
+          </div>
+          <div class="form-group m-b-20">
+            <label for="name">Description</label>
+            <input type="text" class="form-control" ng-model="vm.edited_request.description" placeholder="If there is something to tell about the ingredient, do it here" />
+            <p class="label label-danger" ng-show="vm.errors.description">{{ vm.errors.description }}</p>
+          </div>
+          <div class="form-group m-b-20">
+            <label for="name">Measurement*</label>
+            <select class="form-control" ng-model="vm.edited_request.default_measurement_id" ng-options="measurement.id as measurement.name for measurement in vm.measurements" required></select> 
+            <p class="label label-danger" ng-show="vm.errors.default_measurement_id">{{ vm.errors.default_measurement_id }}</p>
+          </div>
+          <div class="form-group m-b-20">
+          <label for="name">Additional notes to alastair admin</label>
+            <input type="text" class="form-control" ng-model="vm.edited_request.request_message" />
+            <p class="label label-danger" ng-show="vm.errors.description">{{ vm.errors.request_message }}</p>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
+          <button type="submit" ng-disabled="requestForm.$pristine || requestForm.$invalid" class="btn btn-sm btn-success"><i class="fa fa-save"></i> Save </button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="modal fade" id="showRequestModal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+        <h4 class="modal-title">Requesting {{ vm.shown_request.name }}</h4>
+      </div>
+      <div class="modal-body">
+        <div class="m-b-20">
+          <label>Name</label>
+          <p>{{vm.show_request.name}}</p>
+        </div>
+        <div class="m-b-20">
+          <label>Description</label>
+          <p>{{vm.show_request.description}}</p>
+        </div>
+        <div class="m-b-20">
+          <label>Measurement</label>
+          <p>{{vm.show_request.default_measurement.name}}</p>
+        </div>
+        <div class="m-b-20">
+          <label>Reason</label>
+          <p>{{vm.show_request.request_message}}</p>
+        </div>
+        <div class="m-b-20">
+          <label>Requested by</label>
+          <p><oms-simple-user userid="{{vm.show_request.requested_by}}" ng-if="vm.show_request"></oms-simple-user></p>
+        </div>
+        <div class="m-b-20">
+          <label>Status</label>
+          <p>{{vm.show_request.approval_state}}</p>
+        </div>
+        <div class="m-b-20" ng-show="vm.show_request.admin_message">
+          <label>Admin Message</label>
+          <p>{{vm.show_request.admin_message}}</p>
+        </div>
+      </div>
+      <div ng-if="vm.permissions.superuser && vm.show_request.approval_state == 'requesting'" class="modal-footer">
+        <input type="text" class="form-control" ng-model="_admin_message" placeholder="approval or rejection reason" />
+        <button type="button" class="btn btn-sm btn-danger" ng-click="vm.review_request('rejected', _admin_message, vm.show_request)""><i class="fa fa-minus"></i> Reject</button>
+        <button type="button" class="btn btn-sm btn-success" ng-click="vm.review_request('accepted', _admin_message, vm.show_request)" ><i class="fa fa-plus"></i> Approve </button>
+      </div>
+      <div ng-if="!(vm.permissions.superuser && vm.show_request.approval_state == 'requesting')" class="modal-footer">
+        <button type="button" class="btn btn-sm btn-danger" data-dismiss="modal"><i class="fa fa-ban"></i> Close</button>
+      </div>
+    </div>
+  </div>
+</div>

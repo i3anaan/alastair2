@@ -13,12 +13,15 @@ services:
         expose:
             - "4000"
         labels:
-            - "traefik.frontend.rule=HostRegexp:{domain:[a-z]+};PathPrefix:/services/alastair;PathPrefixStrip:/services/alastair"
+            - "traefik.frontend.rule=HostRegexp:{domain:[a-z0-9.]+};PathPrefix:/services/alastair;PathPrefixStrip:/services/alastair"
             - "traefik.frontend.priority=100"
             - "traefik.port=4000"
             - "traefik.backend=alastair"
             - "traefik.enable=true"
             - "registry.modules=/static/getModules.json"
+            - "registry.status=/status"
+        environment:
+            - MIX_ENV=prod
 
     postgres-alastair:
         image: postgres:latest

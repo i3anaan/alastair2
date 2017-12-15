@@ -13,8 +13,9 @@ defmodule Alastair.ShoppingListView do
   def render("unmapped.json", %{shopping_list: ri}) do
     %{ingredient_id: ri.ingredient_id,
       ingredient: render_assoc_one(ri.ingredient, Alastair.IngredientView, "ingredient.json"),
-      note: render_assoc_one(ri.note, Alastair.ShoppingListView, "note.json"),
-      calculated_quantity: ri.real_quantity
+      note: render_assoc_one(Map.get(ri, :note, nil), Alastair.ShoppingListView, "note.json"),
+      calculated_quantity: ri.real_quantity,
+      used_in_meals: ri.used_in_meals
     }
   end
 
@@ -26,7 +27,8 @@ defmodule Alastair.ShoppingListView do
       note: render_assoc_one(ri.note, Alastair.ShoppingListView, "note.json"),
       calculated_quantity: ri.real_quantity,
       best_price: ri.best_price,
-      chosen_price: ri.chosen_item.item_price
+      chosen_price: ri.chosen_item.item_price,
+      used_in_meals: ri.used_in_meals
     }
   end
 

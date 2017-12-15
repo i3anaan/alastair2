@@ -3,6 +3,7 @@ defmodule Alastair.Admin do
 
   schema "admins" do
     field :user_id, :string
+    field :active, :boolean, default: false
 
     timestamps()
   end
@@ -12,7 +13,8 @@ defmodule Alastair.Admin do
   """
   def changeset(struct, params \\ %{}) do
     struct
-    |> cast(params, [:user_id])
+    |> cast(params, [:user_id, :active])
     |> validate_required([:user_id])
+    |> unique_constraint(:user_id)
   end
 end

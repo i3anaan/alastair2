@@ -6,7 +6,8 @@ config :alastair, Alastair.Endpoint,
   http: [port: 4001],
   server: false,
   user_service: :static_user,
-  event_service: :static_event
+  event_service: :static_event,
+  notification_service: :dispatch_static
 
 # Print only warnings and errors during test
 config :logger, level: :warn

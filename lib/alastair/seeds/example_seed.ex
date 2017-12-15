@@ -211,5 +211,9 @@ defmodule Alastair.Seeds.ExampleSeed do
 			ingredient: tomatoes,
 			shopping_item: fresh_tomatoes
 		})
+
+		Alastair.Repo.insert!(%Alastair.Admin{
+			user_id: "3"
+		})
 	end
 end

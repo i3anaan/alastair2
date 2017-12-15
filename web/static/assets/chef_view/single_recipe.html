@@ -93,12 +93,12 @@
                 <div class="modal-body">
                     <div class="form-group m-b-20">
                         <label for="name">Name*</label>
-                        <input type="text" class="form-control" ng-model="vm.edited_recipe.name" required />
+                        <input type="text" class="form-control" ng-model="vm.edited_recipe.name" required placeholder="The name of your recipe" />
                         <p class="label label-danger" ng-show="vm.errors.name">{{ vm.errors.name }}</p>
                     </div>
                     <div class="form-group m-b-20">
                         <label for="description">Description</label>
-                        <input type="text" class="form-control" ng-model="vm.edited_recipe.description" />
+                        <input type="text" class="form-control" ng-model="vm.edited_recipe.description" placeholder="Say a bit more about it to convince people to try it" />
                         <p class="label label-danger" ng-show="vm.errors.description">{{ vm.errors.description }}</p>
                     </div>
                     <div class="form-group m-b-20">

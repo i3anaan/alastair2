@@ -11,7 +11,9 @@ defmodule Alastair.AdminView do
 
   def render("admin.json", %{admin: admin}) do
     %{id: admin.id,
-      user_id: admin.user_id}
+      user_id: admin.user_id,
+      active: admin.active
+    }
   end
 
   def render("user.json", %{user: user}) do

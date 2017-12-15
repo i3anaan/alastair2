@@ -28,6 +28,7 @@ defmodule Alastair.Router do
 
     get "/user", AdminController, :own_user
     resources "/admins", AdminController, except: [:new, :edit, :update]
+    put "/admins/:id", AdminController, :set_active
 
     scope "/events/:event_id", as: :event do
       resources "/meals", MealController, except: [:new, :edit]
@@ -42,6 +43,8 @@ defmodule Alastair.Router do
     end
     get "/my_recipes", RecipeController, :index_mine
     resources "/ingredients", IngredientController, except: [:new, :edit]
+    resources "/ingredient_requests", IngredientRequestController, except: [:new, :edit, :delete]
+
 
     resources "/shops", ShopController, except: [:new, :edit] do
       resources "/shopping_items", ShoppingItemController, except: [:new, :edit]

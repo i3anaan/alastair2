@@ -3,10 +3,7 @@ defmodule Alastair.GeneralController do
 
   defp check_db() do
     try do
-        measurements = Alastair.Repo.all(Alastair.Measurement)
-        if Enum.empty?(measurements) do
-          raise "empty"
-        end
+        Ecto.Adapters.SQL.query(Alastair.Repo, "SELECT 1")
         :ok
     rescue
       _ -> :error

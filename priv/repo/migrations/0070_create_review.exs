@@ -5,7 +5,7 @@ defmodule Alastair.Repo.Migrations.CreateReview do
     create table(:reviews) do
       add :rating, :integer
       add :review, :text
-      add :recipe_id, references(:recipes, on_delete: :nothing)
+      add :recipe_id, references(:recipes, on_delete: :delete_all)
       add :user_id, :string
 
       timestamps()

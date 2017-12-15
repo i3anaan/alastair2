@@ -159,6 +159,19 @@
           }
         }
       })
+      .state('app.alastair_chef.ingredient_requests', {
+        url: '/ingredient_requests',
+        data: { pageTitle: 'Alastair Ingredient Request' },
+        params: {
+          id: null
+        },
+        views: {
+          'pageContent@app': {
+            templateUrl: `${baseUrl}static/chef_view/ingredient_requests.html`,
+            controller: 'RequestsController as vm'
+          }
+        }
+      })
   }
 
 
@@ -368,8 +381,8 @@
 
     vm.addToMeal = function() {
       $.gritter.add({
-        title: 'Not yet implemented',
-        text: 'Go beat up the developers for being lazy',
+        title: 'Developer-lazy-error',
+        text: 'In this version you still have to use the organizers view to add a recipe to a meal',
         sticky: false,
         time: 8000,
         class_name: 'my-sticky-class',
@@ -454,7 +467,7 @@
     loadMeasurements($http, vm);
   }
 
-  function AdminsController($http) {
+  function AdminsController($http, $rootScope) {
     var vm = this;
 
     vm.permissions = {
@@ -513,6 +526,7 @@
         method: 'GET'
       }).then(function(response) {
         vm.admins = response.data.data;
+        vm.me = vm.admins.find((i) => {return i.user_id == $rootScope.currentUser.id})
         if(callback)
           callback();
       }).catch(function(error) {
@@ -549,7 +563,104 @@
       });
     }
 
+    vm.setAdminEnabled = function(value) {
+      $http({
+        url: apiUrl + '/admins/' + vm.me.id,
+        method: 'PUT',
+        data: {
+          active: value
+        }
+      }).then(function(response) {
+        vm.loadAdmins(function() {vm.busy = false;});
+        vm.loadPermissions();
+        showSuccess("Successfully triggered admin mode");
+      }).catch(function(error) {
+        showError(error);
+      });
+    }
+
     vm.loadAdmins(function() {vm.busy = false;});
+    vm.loadPermissions();
+  }
+
+  function RequestsController($http, $stateParams) {
+    var vm = this;
+
+    vm.permissions = {
+      superadmin: false
+    }
+
+    vm.loadPermissions = function() {
+      return $http({
+        url: apiUrl + '/user',
+        method: 'GET'
+      }).then(function(response) {
+        vm.permissions.superuser = response.data.data.superadmin;
+      }).catch(function(error) {
+        showError();
+      });
+    }
+
+    vm.newRequest = function() {
+      $('#requestModal').modal('show');
+      vm.edited_request = {};
+      vm.errors = {};
+    }
+
+    vm.submitForm = function() {
+      $http({
+        url: apiUrl + 'ingredient_requests',
+        method: 'POST',
+        data: {
+          ingredient_request: vm.edited_request
+        }
+      }).then(function(response) {
+        $('#requestModal').modal('hide');
+        vm.showRequest(response.data.data.id);
+        vm.resetData();
+        showSuccess('Request recorded');          
+      }).catch(function(error) {
+        if(error.status == 422)
+          vm.errors = error.data.errors;
+        else
+          showError(error);
+      });
+    }
+
+    vm.showRequest = function(id) {
+      $http({
+        url: apiUrl + 'ingredient_requests/' + id,
+        method: 'GET'
+      }).then((response) => {
+        vm.show_request = response.data.data;
+        $('#showRequestModal').modal('show');
+      }).catch((error) => {
+        showError(error);
+      });
+    }
+
+    vm.review_request = function(approval_state, admin_message, request) {
+      request.approval_state = approval_state;
+      request.admin_message = admin_message;
+      $http({
+        url: apiUrl + 'ingredient_requests/' + request.id,
+        method: 'PUT',
+        data: {
+          ingredient_request: request
+        }
+      }).then((response) => {
+        $('#showRequestModal').modal('hide');
+        vm.resetData();
+      }).catch((error) => {
+        showError(error);
+      });
+    }
+
+    if($stateParams.id) {
+      showRequest(id);
+    }
+    infiniteScroll($http, vm, apiUrl + 'ingredient_requests');
+    loadMeasurements($http, vm);
     vm.loadPermissions();
   }
 
@@ -585,6 +696,7 @@
     .controller('SingleRecipeController', SingleRecipeController)
     .controller('MyRecipesController', MyRecipesController)
     .controller('AdminsController', AdminsController)
+    .controller('RequestsController', RequestsController)
     .directive('omsStarRating', StarRatingDirective);
 })();
 

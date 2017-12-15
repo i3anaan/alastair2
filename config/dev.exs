@@ -13,7 +13,8 @@ config :alastair, Alastair.Endpoint,
   check_origin: false,
   watchers: [],
   user_service: :oms_user,
-  event_service: :static_event
+  event_service: :static_event,
+  notification_service: :dispatch_oms
 
 
 # Watch static and templates for browser reloading.
@@ -39,6 +40,6 @@ config :alastair, Alastair.Repo,
   adapter: Ecto.Adapters.Postgres,
   username: "postgres",
   password: "postgres",
-  database: "alastair",
+  database: "alastair-dev",
   hostname: "postgres-alastair",
   pool_size: 10

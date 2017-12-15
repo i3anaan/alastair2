@@ -3,5 +3,6 @@ defmodule Alastair.Repo.Migrations.CreateEnums do
 
   def change do
     PermissionTypeEnum.create_type
+    ApprovalStateEnum.create_type
   end
 end
